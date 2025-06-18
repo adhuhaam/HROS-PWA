@@ -1,8 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Clock, FileText, TrendingUp, User, Users, CheckCircle, XCircle, AlertCircle, Gift, Briefcase, Bell } from "lucide-react";
+import { 
+  CalendarDaysIcon, 
+  ClockIcon, 
+  DocumentTextIcon, 
+  ArrowTrendingUpIcon, 
+  UserIcon, 
+  UsersIcon, 
+  CheckCircleIcon, 
+  XCircleIcon, 
+  ExclamationTriangleIcon,
+  GiftIcon,
+  BriefcaseIcon,
+  BellIcon
+} from "@heroicons/react/24/outline";
 import { MobileHeader } from "@/components/mobile-header";
 import { RotatingCard } from "@/components/rotating-card";
-import { RotatingEmployeeCard } from "@/components/rotating-employee-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -163,11 +175,11 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
 
   const getStatusIcon = (status: string) => {
     if (status.includes("Checked In") || status.includes("Present")) {
-      return <CheckCircle className="h-6 w-6 text-green-500" />;
+      return <CheckCircleIcon className="h-6 w-6 text-green-500" />;
     } else if (status.includes("Absent")) {
-      return <XCircle className="h-6 w-6 text-red-500" />;
+      return <XCircleIcon className="h-6 w-6 text-red-500" />;
     } else {
-      return <AlertCircle className="h-6 w-6 text-yellow-500" />;
+      return <ExclamationTriangleIcon className="h-6 w-6 text-yellow-500" />;
     }
   };
 
@@ -190,9 +202,20 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
       />
 
       <div className="px-4 pb-28 pt-4">
-        {/* Rotating Employee Card */}
-        <RotatingEmployeeCard 
-          employee={employeeDetails ? {
+        {/* Welcome Card */}
+        <RotatingCard
+          icon={<div className="w-16 h-16 flex-shrink-0">
+            <Lottie
+              animationData={welcomeAnimation}
+              loop={true}
+              autoplay={true}
+              style={{ width: "100%", height: "100%" }}
+            />
+          </div>}
+          title={`Good ${new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'}!`}
+          value="Welcome back to HRoS Employee Portal"
+          bgColor="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent"
+          employeeData={employeeDetails ? {
             name: employeeDetails.name,
             employeeId: employeeDetails.emp_no,
             designation: employeeDetails.designation,
