@@ -4,6 +4,7 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { LoadingOverlay } from "@/components/loading-overlay";
 import { BottomNavigation } from "@/components/bottom-navigation";
@@ -92,14 +93,16 @@ function AppContent() {
 
 function App() {
   return (
-    <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <AppContent />
-        </TooltipProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <LanguageProvider>
+      <ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Toaster />
+            <AppContent />
+          </TooltipProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </LanguageProvider>
   );
 }
 

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { User, Mail, Phone, MapPin, Building, Calendar, Settings, LogOut, Edit, Camera, Globe } from "lucide-react";
 import { MobileHeader } from "@/components/mobile-header";
@@ -6,6 +5,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { LoadingOverlay } from "@/components/loading-overlay";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useLanguage, Language } from "@/contexts/LanguageContext";
 
 interface ProfilePageProps {
   onBack: () => void;
@@ -27,7 +27,7 @@ interface UserProfile {
 }
 
 export function ProfilePage({ onBack, onLogout }: ProfilePageProps) {
-  const [selectedLanguage, setSelectedLanguage] = useState("english");
+  const { language, setLanguage, t } = useLanguage();
 
   const { data: user, isLoading } = useQuery<UserProfile>({
     queryKey: ["/api/auth/user"],
@@ -38,12 +38,12 @@ export function ProfilePage({ onBack, onLogout }: ProfilePageProps) {
   });
 
   const languages = [
-    { value: "english", label: "English", flag: "🇺🇸" },
-    { value: "sinhala", label: "සිංහල (Sinhala)", flag: "🇱🇰" },
-    { value: "tamil", label: "தமிழ் (Tamil)", flag: "🇮🇳" },
-    { value: "hindi", label: "हिंदी (Hindi)", flag: "🇮🇳" },
-    { value: "malayalam", label: "മലയാളം (Malayalam)", flag: "🇮🇳" },
-    { value: "bangla", label: "বাংলা (Bangla)", flag: "🇧🇩" },
+    { value: "english" as Language, label: "English", flag: "🇺🇸" },
+    { value: "sinhala" as Language, label: "සිංහල (Sinhala)", flag: "🇱🇰" },
+    { value: "tamil" as Language, label: "தமிழ் (Tamil)", flag: "🇮🇳" },
+    { value: "hindi" as Language, label: "हिंदी (Hindi)", flag: "🇮🇳" },
+    { value: "malayalam" as Language, label: "മലയാളം (Malayalam)", flag: "🇮🇳" },
+    { value: "bangla" as Language, label: "বাংলা (Bangla)", flag: "🇧🇩" },
   ];
 
   const formatDate = (dateString?: string) => {
