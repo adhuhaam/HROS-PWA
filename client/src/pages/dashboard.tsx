@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Calendar, Clock, FileText, TrendingUp, User, Users, CheckCircle, XCircle, AlertCircle, Gift, Briefcase, Bell } from "lucide-react";
 import { MobileHeader } from "@/components/mobile-header";
 import { RotatingCard } from "@/components/rotating-card";
+import { RotatingEmployeeCard } from "@/components/rotating-employee-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
