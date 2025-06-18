@@ -198,27 +198,28 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
       />
 
       <div className="px-4 pb-28 pt-4">
-        {/* Welcome Card */}
-        <RotatingCard
-          icon={<div className="w-16 h-16 flex-shrink-0">
-            <Lottie
-              animationData={welcomeAnimation}
-              loop={true}
-              autoplay={true}
-              style={{ width: "100%", height: "100%" }}
-            />
-          </div>}
-          title={`Good ${new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'}!`}
-          value="Welcome back to HRoS Employee Portal"
-          bgColor="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent"
-          employeeData={employeeDetails ? {
-            name: employeeDetails.name,
-            employeeId: employeeDetails.emp_no,
-            designation: employeeDetails.designation,
-            department: employeeDetails.department,
-            photoUrl: employeeDetails.photo_file_name
-          } : undefined}
-        />
+        {/* Employee ID Card */}
+        <div className="mb-6">
+          <RotatingCard
+            icon={<UserIcon className="h-8 w-8 text-primary" />}
+            title={`Good ${new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'}!`}
+            value="Employee ID Card"
+            bgColor="bg-white/70 dark:bg-black/70 backdrop-blur-xl border border-white/30 dark:border-gray-700/30"
+            onClick={() => {}}
+            employeeData={employeeDetails ? {
+              name: employeeDetails.name,
+              employeeId: employeeDetails.emp_no,
+              designation: employeeDetails.designation,
+              department: employeeDetails.department,
+              photoUrl: employeeDetails.photo_file_name
+            } : {
+              name: userName,
+              employeeId: employeeId,
+              designation: user?.position || "Employee",
+              department: user?.department || "Department"
+            }}
+          />
+        </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-4 mb-6">

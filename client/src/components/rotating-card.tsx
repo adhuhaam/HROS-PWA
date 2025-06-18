@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { User, Building2 } from "lucide-react";
+import { UserIcon, BuildingOfficeIcon } from "@heroicons/react/24/outline";
 
 interface EmployeeData {
   name: string;
@@ -41,52 +41,67 @@ export function RotatingCard({ icon, title, value, bgColor = "bg-green-100", onC
             isFlipped ? 'rotate-y-180' : ''
           }`}
         >
-          {/* Front Face - Welcome Message */}
-          <div className="absolute inset-0 w-full h-full backface-hidden rounded-xl ios-card">
-            <CardContent className="p-6 h-full flex items-center space-x-4">
-              {icon}
-              <div className="flex-1">
-                <h2 className="text-xl font-normal text-foreground mb-1">{title}</h2>
-                <p className="text-muted-foreground font-normal">{value}</p>
+          {/* Front Face - Employee Details */}
+          <div className="absolute inset-0 w-full h-full backface-hidden rounded-xl" 
+               style={{ 
+                 background: 'rgba(255, 255, 255, 0.8)',
+                 backdropFilter: 'blur(20px)',
+                 WebkitBackdropFilter: 'blur(20px)',
+                 border: '1px solid rgba(255, 255, 255, 0.3)'
+               }}>
+            <CardContent className="p-6 h-full flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+                <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                  <UserIcon className="w-5 h-5 text-primary" />
+                </div>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div className="flex-shrink-0">
+                  {employeeData.photoUrl ? (
+                    <img
+                      src={employeeData.photoUrl}
+                      alt={employeeData.name}
+                      className="w-16 h-16 rounded-full border-2 border-primary/20 object-cover"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center">
+                      <UserIcon className="w-8 h-8 text-primary" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold text-gray-900 truncate">{employeeData.name}</h3>
+                  <p className="text-sm text-gray-600 mb-1">ID: {employeeData.employeeId}</p>
+                  {employeeData.designation && (
+                    <div className="flex items-center text-xs text-gray-500 mb-1">
+                      <BuildingOfficeIcon className="w-3 h-3 mr-1" />
+                      <span className="truncate">{employeeData.designation}</span>
+                    </div>
+                  )}
+                  {employeeData.department && (
+                    <p className="text-xs text-gray-500 truncate">{employeeData.department}</p>
+                  )}
+                </div>
               </div>
             </CardContent>
           </div>
 
-          {/* Back Face - Employee Details */}
-          <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 rounded-xl ios-card">
-            <CardContent className="p-6 h-full flex items-center space-x-4">
-              <div className="flex-shrink-0">
-                {employeeData.photoUrl ? (
-                  <img
-                    src={employeeData.photoUrl}
-                    alt={employeeData.name}
-                    className="w-16 h-16 rounded-full border-2 border-primary/20 object-cover"
-                  />
-                ) : (
-                  <div className="w-16 h-16 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center">
-                    <User className="w-8 h-8 text-primary" />
-                  </div>
-                )}
+          {/* Back Face - Company Logo */}
+          <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 rounded-xl"
+               style={{ 
+                 background: 'rgba(255, 255, 255, 0.8)',
+                 backdropFilter: 'blur(20px)',
+                 WebkitBackdropFilter: 'blur(20px)',
+                 border: '1px solid rgba(255, 255, 255, 0.3)'
+               }}>
+            <CardContent className="p-6 h-full flex flex-col items-center justify-center">
+              <div className="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center mb-4">
+                <span className="text-2xl font-bold text-white">HRoS</span>
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-normal text-foreground truncate">{employeeData.name}</h3>
-                <p className="text-sm text-muted-foreground mb-1 font-normal">ID: {employeeData.employeeId}</p>
-                {employeeData.designation && (
-                  <div className="flex items-center text-xs text-muted-foreground mb-1">
-                    <Building2 className="w-3 h-3 mr-1" />
-                    <span className="truncate font-normal">{employeeData.designation}</span>
-                  </div>
-                )}
-                {employeeData.department && (
-                  <p className="text-xs text-muted-foreground truncate font-normal">{employeeData.department}</p>
-                )}
-              </div>
-              <div className="flex-shrink-0">
-                {/* Company Logo */}
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <span className="text-xs font-bold text-primary">HRoS</span>
-                </div>
-              </div>
+              <h3 className="text-lg font-semibold text-gray-900 text-center">Human Resource</h3>
+              <h3 className="text-lg font-semibold text-gray-900 text-center">Operating System</h3>
+              <p className="text-sm text-gray-500 text-center mt-2">Employee Portal</p>
             </CardContent>
           </div>
         </div>
@@ -98,6 +113,12 @@ export function RotatingCard({ icon, title, value, bgColor = "bg-green-100", onC
   return (
     <Card 
       className="shadow-sm border touch-active cursor-pointer hover:scale-105 transition-transform"
+      style={{
+        background: bgColor.includes('bg-white') || bgColor.includes('bg-black') ? bgColor : 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.3)'
+      }}
       onClick={handleClick}
     >
       <CardContent className="p-6">
