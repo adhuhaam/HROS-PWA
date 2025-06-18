@@ -257,7 +257,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
         </div>
 
         {/* Quick Actions */}
-        <Card className="mb-6">
+        <Card className="credit-card mb-6 border-0">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <UserIcon className="h-5 w-5" />
@@ -306,7 +306,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
         </Card>
 
         {/* Notices */}
-        <Card className="mb-6">
+        <Card className="credit-card mb-6 border-0">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BellIcon className="h-5 w-5" />
@@ -341,7 +341,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
         </Card>
 
         {/* Upcoming Holidays */}
-        <Card>
+        <Card className="credit-card border-0">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <GiftIcon className="h-5 w-5" />
