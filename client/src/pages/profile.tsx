@@ -1,160 +1,285 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { User, Mail, Phone, MapPin, Building, Calendar, Settings, LogOut, Edit, Camera } from "lucide-react";
 import { MobileHeader } from "@/components/mobile-header";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
-import { 
-  IdCard, 
-  Mail, 
-  Phone, 
-  Calendar, 
-  Bell, 
-  Shield, 
-  LogOut 
-} from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { LoadingOverlay } from "@/components/loading-overlay";
 
 interface ProfilePageProps {
   onBack: () => void;
   onLogout: () => void;
 }
 
-export function ProfilePage({ onBack, onLogout }: ProfilePageProps) {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+interface UserProfile {
+  id: number;
+  name: string;
+  employeeId: string;
+  email: string;
+  phone?: string;
+  department?: string;
+  position?: string;
+  joinDate?: string;
+  location?: string;
+  manager?: string;
+  photoUrl?: string;
+}
 
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("POST", "/api/auth/logout");
-    },
-    onSuccess: () => {
-      queryClient.clear();
-      toast({
-        title: "Logged Out",
-        description: "You have been successfully logged out",
-      });
-      onLogout();
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
+export function ProfilePage({ onBack, onLogout }: ProfilePageProps) {
+  const { data: user, isLoading } = useQuery<UserProfile>({
+    queryKey: ["/api/auth/user"],
   });
 
-  if (!user) return null;
+  const { data: employeeDetails } = useQuery({
+    queryKey: ["/api/employee/details"],
+  });
 
-  const profileInfo = [
-    {
-      icon: <IdCard className="text-gray-400 w-5 h-5" />,
-      label: "Employee ID",
-      value: user.employeeId,
-    },
-    {
-      icon: <Mail className="text-gray-400 w-5 h-5" />,
-      label: "Email",
-      value: user.email,
-    },
-    {
-      icon: <Phone className="text-gray-400 w-5 h-5" />,
-      label: "Phone",
-      value: user.phone || "Not provided",
-    },
-    {
-      icon: <Calendar className="text-gray-400 w-5 h-5" />,
-      label: "Join Date",
-      value: user.joinDate ? new Date(user.joinDate).toLocaleDateString() : "Not available",
-    },
-  ];
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'Not specified';
+    return new Date(dateString).toLocaleDateString([], { 
+      month: 'long', 
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
 
-  const settingsOptions = [
-    {
-      icon: <Bell className="text-gray-600 w-5 h-5" />,
-      label: "Notifications",
-      action: () => {},
-    },
-    {
-      icon: <Shield className="text-gray-600 w-5 h-5" />,
-      label: "Privacy & Security",
-      action: () => {},
-    },
-  ];
+  if (isLoading) {
+    return <LoadingOverlay isVisible={true} message="Loading profile..." />;
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen" style={{ background: '#f2f2f7' }}>
+        <MobileHeader title="Profile" onBack={onBack} />
+        <div className="px-4 pt-4">
+          <div className="ios-card">
+            <div className="p-6 text-center">
+              <p className="text-gray-500 dark:text-gray-400">Unable to load profile information</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const profile: UserProfile = {
+    ...user,
+    phone: employeeDetails?.contact_number || user.phone,
+    department: employeeDetails?.department || user.department,
+    position: employeeDetails?.designation || user.position,
+    photoUrl: employeeDetails?.photo_file_name
+  };
 
   return (
-    <div className="min-h-screen pb-20">
-      <MobileHeader title="Profile" onBack={onBack} />
-      
-      {/* Profile Header */}
-      <div className="px-6 py-6">
-        <Card className="shadow-sm border text-center">
-          <CardContent className="p-6">
-            <img 
-              src={user.profileImageUrl || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300"}
-              alt="Profile"
-              className="w-20 h-20 rounded-full mx-auto mb-4 object-cover"
-            />
-            <h2 className="text-xl font-bold text-gray-900 mb-1">{user.name}</h2>
-            <p className="text-gray-600 mb-2">{user.position || "Employee"}</p>
-            <p className="text-sm text-gray-500">{user.department || "Department"}</p>
-          </CardContent>
-        </Card>
-      </div>
-      
-      {/* Profile Information */}
-      <div className="px-6 space-y-4">
-        {profileInfo.map((info, index) => (
-          <Card key={index} className="shadow-sm border">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">{info.label}</p>
-                  <p className="font-medium text-gray-900">{info.value}</p>
-                </div>
-                {info.icon}
+    <div className="min-h-screen" style={{ background: '#f2f2f7' }}>
+      <MobileHeader 
+        title="Profile" 
+        onBack={onBack}
+        showNotifications={true}
+      />
+
+      <div className="px-4 pb-28 space-y-4 pt-4">
+        {/* Profile Header */}
+        <div className="ios-card">
+          <div className="p-6">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="relative">
+                {profile.photoUrl ? (
+                  <img
+                    src={profile.photoUrl}
+                    alt={profile.name}
+                    className="w-20 h-20 rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-sm"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-900 border-4 border-white dark:border-gray-800 shadow-sm flex items-center justify-center">
+                    <User className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+                  </div>
+                )}
+                <button className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                  <Camera className="w-4 h-4 text-white" />
+                </button>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-        
-        {/* Settings Options */}
-        <div className="pt-4 space-y-2">
-          {settingsOptions.map((option, index) => (
-            <Button
-              key={index}
-              variant="outline"
-              onClick={option.action}
-              className="w-full bg-white rounded-xl p-4 shadow-sm border flex items-center justify-between hover:bg-gray-50 transition-colors h-auto"
-            >
-              <div className="flex items-center space-x-3">
-                {option.icon}
-                <span className="font-medium text-gray-900">{option.label}</span>
+              
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1" style={{ fontWeight: 700, letterSpacing: '-0.022em' }}>
+                  {profile.name}
+                </h2>
+                <p className="text-lg text-gray-600 dark:text-gray-300 mb-1" style={{ fontWeight: 500 }}>
+                  {profile.position || 'Employee'}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  ID: {profile.employeeId}
+                </p>
               </div>
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Button>
-          ))}
-          
-          <Button
-            onClick={() => logoutMutation.mutate()}
-            disabled={logoutMutation.isPending}
-            className="w-full bg-white rounded-xl p-4 shadow-sm border flex items-center justify-between hover:bg-red-50 transition-colors text-red-600 h-auto"
-            variant="outline"
-          >
-            <div className="flex items-center space-x-3">
-              <LogOut className="w-5 h-5" />
-              <span className="font-medium">
-                {logoutMutation.isPending ? "Logging out..." : "Logout"}
-              </span>
+              
+              <button className="ios-button-secondary p-3 rounded-full">
+                <Edit className="w-5 h-5" />
+              </button>
             </div>
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </Button>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="ios-list-item p-4 text-center">
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1" style={{ fontWeight: 700, letterSpacing: '-0.022em' }}>
+                  2.5
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Years</p>
+              </div>
+              
+              <div className="ios-list-item p-4 text-center">
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400 mb-1" style={{ fontWeight: 700, letterSpacing: '-0.022em' }}>
+                  95%
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Attendance</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Contact Information */}
+        <div className="ios-card">
+          <div className="p-6">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4" style={{ fontWeight: 600, letterSpacing: '-0.022em' }}>
+              Contact Information
+            </h3>
+            
+            <div className="space-y-3">
+              <div className="ios-list-item p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                    <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
+                    <p className="text-lg font-medium text-gray-900 dark:text-white" style={{ fontWeight: 500, letterSpacing: '-0.011em' }}>
+                      {profile.email}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="ios-list-item p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                    <Phone className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Phone</p>
+                    <p className="text-lg font-medium text-gray-900 dark:text-white" style={{ fontWeight: 500, letterSpacing: '-0.011em' }}>
+                      {profile.phone || 'Not provided'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="ios-list-item p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                    <Building className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Department</p>
+                    <p className="text-lg font-medium text-gray-900 dark:text-white" style={{ fontWeight: 500, letterSpacing: '-0.011em' }}>
+                      {profile.department || 'Not specified'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="ios-list-item p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center">
+                    <Calendar className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Join Date</p>
+                    <p className="text-lg font-medium text-gray-900 dark:text-white" style={{ fontWeight: 500, letterSpacing: '-0.011em' }}>
+                      {formatDate(profile.joinDate)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Settings */}
+        <div className="ios-card">
+          <div className="p-6">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4" style={{ fontWeight: 600, letterSpacing: '-0.022em' }}>
+              Settings
+            </h3>
+            
+            <div className="space-y-3">
+              <div className="ios-list-item p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
+                      <Settings className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                    </div>
+                    <span className="text-lg font-medium text-gray-900 dark:text-white" style={{ fontWeight: 500, letterSpacing: '-0.011em' }}>
+                      Dark Mode
+                    </span>
+                  </div>
+                  <ThemeToggle />
+                </div>
+              </div>
+
+              <button className="w-full ios-list-item p-4 text-left hover:scale-[0.98] transition-transform">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                    <Settings className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <span className="text-lg font-medium text-gray-900 dark:text-white" style={{ fontWeight: 500, letterSpacing: '-0.011em' }}>
+                    Notification Settings
+                  </span>
+                </div>
+              </button>
+
+              <button className="w-full ios-list-item p-4 text-left hover:scale-[0.98] transition-transform">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                    <Settings className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  </div>
+                  <span className="text-lg font-medium text-gray-900 dark:text-white" style={{ fontWeight: 500, letterSpacing: '-0.011em' }}>
+                    Privacy Settings
+                  </span>
+                </div>
+              </button>
+
+              <button className="w-full ios-list-item p-4 text-left hover:scale-[0.98] transition-transform">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                    <Settings className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <span className="text-lg font-medium text-gray-900 dark:text-white" style={{ fontWeight: 500, letterSpacing: '-0.011em' }}>
+                    Language & Region
+                  </span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Logout */}
+        <button
+          onClick={onLogout}
+          className="w-full ios-list-item p-4 hover:scale-[0.98] transition-transform"
+          style={{ background: 'rgba(255, 59, 48, 0.1)' }}
+        >
+          <div className="flex items-center justify-center gap-3">
+            <div className="w-8 h-8 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
+              <LogOut className="h-4 w-4 text-red-600 dark:text-red-400" />
+            </div>
+            <span className="text-lg font-semibold text-red-600 dark:text-red-400" style={{ fontWeight: 600, letterSpacing: '-0.011em' }}>
+              Sign Out
+            </span>
+          </div>
+        </button>
+
+        {/* App Info */}
+        <div className="ios-card">
+          <div className="p-6 text-center">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">HRoS Employee Portal</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">Version 2.1.0</p>
+          </div>
         </div>
       </div>
     </div>

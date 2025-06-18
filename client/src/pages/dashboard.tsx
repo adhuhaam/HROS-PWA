@@ -179,7 +179,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen" style={{ background: '#f2f2f7' }}>
       <MobileHeader
         title=""
         showNotifications={true}
@@ -189,7 +189,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
         }}
       />
 
-      <div className="px-4 pb-20">
+      <div className="px-4 pb-28 pt-4">
         {/* Rotating Employee Card */}
         <RotatingEmployeeCard 
           employee={employeeDetails ? {
