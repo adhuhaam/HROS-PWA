@@ -399,3 +399,49 @@ input, textarea, select {
 .mix-blend-difference {
   mix-blend-mode: difference;
 }
+
+/* Wave Animation for Login Page */
+.wave-animation {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200vmax;
+  height: 200vmax;
+  background: radial-gradient(circle, rgba(0, 107, 173, 0.1) 0%, rgba(0, 107, 173, 0.05) 30%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: wave-pulse 8s ease-in-out infinite;
+}
+
+.wave-delay-1 {
+  animation-delay: -2s;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.04) 40%, transparent 70%);
+}
+
+.wave-delay-2 {
+  animation-delay: -4s;
+  background: radial-gradient(circle, rgba(147, 197, 253, 0.06) 0%, rgba(147, 197, 253, 0.03) 50%, transparent 70%);
+}
+
+@keyframes wave-pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 0.1;
+  }
+}
+
+.dark .wave-animation {
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.08) 30%, transparent 70%);
+}
+
+.dark .wave-delay-1 {
+  background: radial-gradient(circle, rgba(147, 197, 253, 0.12) 0%, rgba(147, 197, 253, 0.06) 40%, transparent 70%);
+}
+
+.dark .wave-delay-2 {
+  background: radial-gradient(circle, rgba(219, 234, 254, 0.08) 0%, rgba(219, 234, 254, 0.04) 50%, transparent 70%);
+}
