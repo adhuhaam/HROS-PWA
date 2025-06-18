@@ -12,25 +12,36 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  // Convert local API paths to external API URLs
-  const apiUrl = url.startsWith('/api') 
-    ? url.replace('/api', 'https://api.rccmaldives.com/ess')
-    : `https://api.rccmaldives.com/ess${url}`;
+  // For development, use local proxy to avoid CORS issues
+  const isDevelopment = import.meta.env.DEV;
+  const apiUrl = isDevelopment 
+    ? url // Use local proxy in development
+    : url.startsWith('/api') 
+      ? url.replace('/api', 'https://api.rccmaldives.com/ess')
+      : `https://api.rccmaldives.com/ess${url}`;
 
-  const res = await fetch(apiUrl, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-      ...(data ? {} : {})
-    },
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-    mode: "cors",
-  });
+  console.log('API Request:', method, apiUrl);
 
-  await throwIfResNotOk(res);
-  return res;
+  try {
+    const res = await fetch(apiUrl, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        ...(data ? {} : {})
+      },
+      body: data ? JSON.stringify(data) : undefined,
+      credentials: isDevelopment ? "include" : "omit",
+      mode: "cors",
+    });
+
+    console.log('API Response:', res.status, res.statusText);
+    await throwIfResNotOk(res);
+    return res;
+  } catch (error) {
+    console.error('API Request failed:', error);
+    throw error;
+  }
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
@@ -39,27 +50,37 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    // Convert local API paths to external API URLs
+    // For development, use local proxy to avoid CORS issues
+    const isDevelopment = import.meta.env.DEV;
     const url = queryKey[0] as string;
-    const apiUrl = url.startsWith('/api') 
-      ? url.replace('/api', 'https://api.rccmaldives.com/ess')
-      : `https://api.rccmaldives.com/ess${url}`;
+    const apiUrl = isDevelopment 
+      ? url // Use local proxy in development
+      : url.startsWith('/api') 
+        ? url.replace('/api', 'https://api.rccmaldives.com/ess')
+        : `https://api.rccmaldives.com/ess${url}`;
 
-    const res = await fetch(apiUrl, {
-      credentials: "include",
-      mode: "cors",
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
+    console.log('Query Request:', apiUrl);
+
+    try {
+      const res = await fetch(apiUrl, {
+        credentials: isDevelopment ? "include" : "omit",
+        mode: "cors",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        }
+      });
+
+      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+        return null;
       }
-    });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+      await throwIfResNotOk(res);
+      return await res.json();
+    } catch (error) {
+      console.error('Query Request failed:', error);
+      throw error;
     }
-
-    await throwIfResNotOk(res);
-    return await res.json();
   };
 
 export const queryClient = new QueryClient({
