@@ -33,7 +33,7 @@ export function RotatingCard({ icon, title, value, bgColor = "bg-green-100", onC
   if (employeeData) {
     return (
       <div
-        className="relative w-full h-40 perspective-1000 cursor-pointer mb-6"
+        className="relative w-full h-56 perspective-1000 cursor-pointer mb-6"
         onClick={handleClick}
       >
         <div
