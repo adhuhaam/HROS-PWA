@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoadingOverlay } from "@/components/loading-overlay";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface AttendancePageProps {
   onBack: () => void;
@@ -33,6 +34,7 @@ interface TodayAttendance {
 export function AttendancePage({ onBack }: AttendancePageProps) {
   const [activeTab, setActiveTab] = useState("today");
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const { data: todayAttendance, isLoading: todayLoading } = useQuery<TodayAttendance>({
     queryKey: ["/api/attendance/today"],

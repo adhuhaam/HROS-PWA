@@ -18,6 +18,7 @@ import { RotatingCard } from "@/components/rotating-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Badge } from "@/components/ui/badge";
 import { LoadingOverlay } from "@/components/loading-overlay";
 import Lottie from "lottie-react";
@@ -135,6 +136,7 @@ const welcomeAnimation = {
 };
 
 export function DashboardPage({ onNavigate }: DashboardPageProps) {
+  const { t } = useLanguage();
   const { data: user, isLoading: userLoading } = useQuery<User>({
     queryKey: ["/api/auth/user"],
   });
@@ -190,6 +192,13 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
     return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
   };
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return t('dashboard.goodMorning');
+    if (hour < 17) return t('dashboard.goodAfternoon');
+    return t('dashboard.goodEvening');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <MobileHeader
@@ -202,8 +211,8 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
         <div className="mb-6">
           <RotatingCard
             icon={<UserIcon className="h-8 w-8 text-primary" />}
-            title={`Good ${new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'}!`}
-            value="Employee ID Card"
+            title={`${getGreeting()}!`}
+            value={t('dashboard.employeeIdCard')}
             bgColor="bg-white/70 dark:bg-black/70 backdrop-blur-xl border border-white/30 dark:border-gray-700/30"
             onClick={() => {}}
             employeeData={employeeDetails ? {
