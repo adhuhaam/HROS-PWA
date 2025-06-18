@@ -180,3 +180,28 @@ input, textarea, select {
     background-color: var(--hros-blue);
   }
 }
+
+/* Card flip animation utilities */
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-0 {
+  transform: rotateY(0deg);
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.duration-600 {
+  transition-duration: 600ms;
+}
+
+.mix-blend-luminosity {
+  mix-blend-mode: luminosity;
+}
+
+.mix-blend-difference {
+  mix-blend-mode: difference;
+}

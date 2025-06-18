@@ -399,6 +399,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     },
   );
 
+  // Employee details route
+  app.get("/api/employee/details", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const empNo = req.user?.id;
+      const { result } = await makeApiRequest(`employees/index.php?emp_no=${empNo}`, 'GET', null, req.authToken);
+      res.json(result.status === 'success' ? result.data : {});
+    } catch (error) {
+      console.error("Employee details fetch error:", error);
+      res.status(500).json({ message: "Failed to fetch employee details" });
+    }
+  });
+
+  // Notices route
+  app.get("/api/notices", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { result } = await makeApiRequest('settings/index.php?type=notices', 'GET', null, req.authToken);
+      res.json(result.status === 'success' ? result.data : []);
+    } catch (error) {
+      console.error("Notices fetch error:", error);
+      res.status(500).json({ message: "Failed to fetch notices" });
+    }
+  });
+
+  // Holidays route
+  app.get("/api/holidays", isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { result } = await makeApiRequest('settings/index.php?type=holidays', 'GET', null, req.authToken);
+      res.json(result.status === 'success' ? result.data : []);
+    } catch (error) {
+      console.error("Holidays fetch error:", error);
+      res.status(500).json({ message: "Failed to fetch holidays" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
