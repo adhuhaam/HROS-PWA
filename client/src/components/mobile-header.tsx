@@ -14,13 +14,7 @@ interface MobileHeaderProps {
 
 export function MobileHeader({ title, onBack, showNotifications = false, user }: MobileHeaderProps) {
   return (
-    <header className="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-200/20 dark:border-gray-700/20 px-4 py-2 sticky top-0 z-50" 
-            style={{ 
-              background: 'rgba(255, 255, 255, 0.9)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              borderBottom: '0.5px solid rgba(0, 107, 173, 0.2)'
-            }}>
+    <header className="credit-card border-b border-gray-200/20 dark:border-gray-700/20 px-4 py-2 sticky top-0 z-50">
       <div className="flex items-center justify-between h-11">
         {onBack ? (
           <div className="flex items-center space-x-3">

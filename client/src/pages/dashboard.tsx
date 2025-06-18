@@ -191,7 +191,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: '#f2f2f7' }}>
+    <div className="min-h-screen bg-gray-50 dark:bg-black">
       <MobileHeader
         title=""
         showNotifications={true}

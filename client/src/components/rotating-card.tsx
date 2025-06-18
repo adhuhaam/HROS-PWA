@@ -42,13 +42,7 @@ export function RotatingCard({ icon, title, value, bgColor = "bg-green-100", onC
           }`}
         >
           {/* Front Face - Employee Details */}
-          <div className="absolute inset-0 w-full h-full backface-hidden rounded-xl" 
-               style={{ 
-                 background: 'rgba(255, 255, 255, 0.8)',
-                 backdropFilter: 'blur(20px)',
-                 WebkitBackdropFilter: 'blur(20px)',
-                 border: '1px solid rgba(255, 255, 255, 0.3)'
-               }}>
+          <div className="absolute inset-0 w-full h-full backface-hidden credit-card">
             <CardContent className="p-6 h-full flex flex-col justify-between">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
@@ -88,13 +82,7 @@ export function RotatingCard({ icon, title, value, bgColor = "bg-green-100", onC
           </div>
 
           {/* Back Face - Company Logo */}
-          <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 rounded-xl"
-               style={{ 
-                 background: 'rgba(255, 255, 255, 0.8)',
-                 backdropFilter: 'blur(20px)',
-                 WebkitBackdropFilter: 'blur(20px)',
-                 border: '1px solid rgba(255, 255, 255, 0.3)'
-               }}>
+          <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 credit-card">
             <CardContent className="p-6 h-full flex flex-col items-center justify-center">
               <div className="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center mb-4">
                 <span className="text-2xl font-bold text-white">HRoS</span>
@@ -112,13 +100,7 @@ export function RotatingCard({ icon, title, value, bgColor = "bg-green-100", onC
   // Regular dashboard card
   return (
     <Card 
-      className="shadow-sm border touch-active cursor-pointer hover:scale-105 transition-transform"
-      style={{
-        background: bgColor.includes('bg-white') || bgColor.includes('bg-black') ? bgColor : 'rgba(255, 255, 255, 0.8)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 255, 255, 0.3)'
-      }}
+      className="credit-card touch-active cursor-pointer hover:scale-105 transition-transform border-0"
       onClick={handleClick}
     >
       <CardContent className="p-6">
