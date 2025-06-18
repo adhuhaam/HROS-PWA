@@ -8,6 +8,7 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { LoadingOverlay } from "@/components/loading-overlay";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface LoginPageProps {
   onLoginSuccess: () => void;
@@ -20,6 +21,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: { employeeId: string; password: string }) => {
@@ -73,8 +75,8 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
           <div className="mx-auto w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-4">
             <span className="text-2xl font-bold text-white">HRoS</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Welcome Back</h1>
-          <p className="text-gray-600 dark:text-gray-300">Employee Portal</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('login.title')}</h1>
+          <p className="text-gray-600 dark:text-gray-300">{t('login.subtitle')}</p>
         </div>
 
         {/* Transparent Login Card */}

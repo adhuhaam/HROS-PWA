@@ -5,6 +5,7 @@ import {
   CurrencyDollarIcon, 
   UserCircleIcon 
 } from "@heroicons/react/24/outline";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface BottomNavigationProps {
   activeTab: string;
@@ -12,12 +13,14 @@ interface BottomNavigationProps {
 }
 
 export function BottomNavigation({ activeTab, onTabChange }: BottomNavigationProps) {
+  const { t } = useLanguage();
+  
   const tabs = [
-    { id: "dashboard", label: "Home", icon: HomeIcon },
-    { id: "attendance", label: "Attendance", icon: UserIcon },
-    { id: "leave", label: "Leave", icon: CalendarDaysIcon },
-    { id: "payroll", label: "Payroll", icon: CurrencyDollarIcon },
-    { id: "profile", label: "Profile", icon: UserCircleIcon },
+    { id: "dashboard", label: t('nav.home'), icon: HomeIcon },
+    { id: "attendance", label: t('nav.attendance'), icon: UserIcon },
+    { id: "leave", label: t('nav.leave'), icon: CalendarDaysIcon },
+    { id: "payroll", label: t('nav.payroll'), icon: CurrencyDollarIcon },
+    { id: "profile", label: t('nav.profile'), icon: UserCircleIcon },
   ];
 
   return (
