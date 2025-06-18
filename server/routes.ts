@@ -45,24 +45,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const apiResponse = await response.json();
       
       // Check if login was successful
-      if (!apiResponse.success) {
+      if (apiResponse.status !== 'success') {
         return res.status(401).json({ message: apiResponse.message || "Invalid credentials" });
       }
 
       // Create or update user in local storage with API data
-      const userData = apiResponse.user || apiResponse.data;
+      const userData = apiResponse.data;
       let user = await storage.getUserByEmployeeId(employeeId);
       
       if (!user) {
         // Create new user with API data
         user = await storage.createUser({
-          employeeId: userData.employee_id || employeeId,
+          employeeId: userData.employee_id || userData.username || employeeId,
           password: password, // Store for session management
-          name: userData.name || userData.full_name || "Employee",
+          name: userData.name || userData.full_name || userData.display_name || "Employee",
           email: userData.email || "",
-          phone: userData.phone || userData.mobile || "",
-          position: userData.position || userData.designation || "",
-          department: userData.department || "",
+          phone: userData.phone || userData.mobile || userData.contact || "",
+          position: userData.position || userData.designation || userData.job_title || "",
+          department: userData.department || userData.dept || "",
         });
       }
 
@@ -75,6 +75,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Login error:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: error.errors[0].message });
+      }
+      if (error instanceof Error && error.message.includes('fetch')) {
+        return res.status(503).json({ message: "Authentication service unavailable. Please try again later." });
       }
       res.status(500).json({ message: "Login failed. Please try again." });
     }
@@ -187,9 +190,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Leave routes
-  app.get("/api/leave/requests", isAuthenticated, async (req, res) => {
+  app.get("/api/leave/requests", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const requests = await storage.getLeaveRequestsByUserId(userId);
       res.json(requests);
     } catch (error) {
@@ -197,9 +200,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/leave/balances", isAuthenticated, async (req, res) => {
+  app.get("/api/leave/balances", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const currentYear = new Date().getFullYear();
       const balances = await storage.getLeaveBalancesByUserId(userId, currentYear);
       res.json(balances);
@@ -208,9 +211,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/leave/request", isAuthenticated, async (req, res) => {
+  app.post("/api/leave/request", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const requestData = leaveRequestSchema.parse(req.body);
       
       const request = await storage.createLeaveRequest({
@@ -228,9 +231,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Payroll routes
-  app.get("/api/payroll", isAuthenticated, async (req, res) => {
+  app.get("/api/payroll", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const payroll = await storage.getPayrollByUserId(userId);
       res.json(payroll);
     } catch (error) {
@@ -238,9 +241,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/payroll/current", isAuthenticated, async (req, res) => {
+  app.get("/api/payroll/current", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const now = new Date();
       const currentMonth = now.toLocaleString('default', { month: 'long' });
       const currentYear = now.getFullYear();
@@ -253,9 +256,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Documents routes
-  app.get("/api/documents", isAuthenticated, async (req, res) => {
+  app.get("/api/documents", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const documents = await storage.getDocumentsByUserId(userId);
       res.json(documents);
     } catch (error) {

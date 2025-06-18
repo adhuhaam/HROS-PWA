@@ -165,6 +165,9 @@ export class MemStorage implements IStorage {
     const user: User = {
       ...insertUser,
       id,
+      phone: insertUser.phone || null,
+      position: insertUser.position || null,
+      department: insertUser.department || null,
       profileImageUrl: null,
       joinDate: new Date(),
       createdAt: new Date(),
@@ -188,6 +191,8 @@ export class MemStorage implements IStorage {
     const attendance: Attendance = {
       ...attendanceData,
       id,
+      checkIn: attendanceData.checkIn || null,
+      checkOut: attendanceData.checkOut || null,
       createdAt: new Date(),
     };
     this.attendance.set(id, attendance);
@@ -212,6 +217,7 @@ export class MemStorage implements IStorage {
     const request: LeaveRequest = {
       ...requestData,
       id,
+      reason: requestData.reason || null,
       status: "pending",
       createdAt: new Date(),
     };
