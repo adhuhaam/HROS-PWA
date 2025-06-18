@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { User, Mail, Phone, MapPin, Building, Calendar, Settings, LogOut, Edit, Camera } from "lucide-react";
+import { User, Mail, Phone, MapPin, Building, Calendar, Settings, LogOut, Edit, Camera, Globe } from "lucide-react";
 import { MobileHeader } from "@/components/mobile-header";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LoadingOverlay } from "@/components/loading-overlay";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ProfilePageProps {
   onBack: () => void;
@@ -24,6 +27,8 @@ interface UserProfile {
 }
 
 export function ProfilePage({ onBack, onLogout }: ProfilePageProps) {
+  const [selectedLanguage, setSelectedLanguage] = useState("english");
+
   const { data: user, isLoading } = useQuery<UserProfile>({
     queryKey: ["/api/auth/user"],
   });
@@ -31,6 +36,15 @@ export function ProfilePage({ onBack, onLogout }: ProfilePageProps) {
   const { data: employeeDetails } = useQuery({
     queryKey: ["/api/employee/details"],
   });
+
+  const languages = [
+    { value: "english", label: "English", flag: "🇺🇸" },
+    { value: "sinhala", label: "සිංහල (Sinhala)", flag: "🇱🇰" },
+    { value: "tamil", label: "தமிழ் (Tamil)", flag: "🇮🇳" },
+    { value: "hindi", label: "हिंदी (Hindi)", flag: "🇮🇳" },
+    { value: "malayalam", label: "മലയാളം (Malayalam)", flag: "🇮🇳" },
+    { value: "bangla", label: "বাংলা (Bangla)", flag: "🇧🇩" },
+  ];
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'Not specified';
@@ -244,16 +258,33 @@ export function ProfilePage({ onBack, onLogout }: ProfilePageProps) {
                 </div>
               </button>
 
-              <button className="w-full ios-list-item p-4 text-left hover:scale-[0.98] transition-transform">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
-                    <Settings className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+              <div className="ios-list-item p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                      <Globe className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <span className="text-lg font-medium text-gray-900 dark:text-white" style={{ fontWeight: 500, letterSpacing: '-0.011em' }}>
+                      Language
+                    </span>
                   </div>
-                  <span className="text-lg font-medium text-gray-900 dark:text-white" style={{ fontWeight: 500, letterSpacing: '-0.011em' }}>
-                    Language & Region
-                  </span>
+                  <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                    <SelectTrigger className="w-40 h-9 bg-white/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-600/50">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {languages.map((lang) => (
+                        <SelectItem key={lang.value} value={lang.value}>
+                          <div className="flex items-center gap-2">
+                            <span>{lang.flag}</span>
+                            <span>{lang.label}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              </button>
+              </div>
             </div>
           </div>
         </div>
