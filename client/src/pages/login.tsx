@@ -83,14 +83,14 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         <Card className="credit-card border-0">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg text-center text-gray-900 dark:text-gray-100">
-              Sign In
+              {t('login.signin')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="employeeId" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Employee ID
+{t('login.employeeId')}
                 </Label>
                 <div className="relative">
                   <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -108,7 +108,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Password
+{t('login.password')}
                 </Label>
                 <div className="relative">
                   <LockClosedIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -141,12 +141,12 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                 {loginMutation.isPending ? (
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Signing in...
+                    {t('login.signingIn')}
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
                     <ArrowRightOnRectangleIcon className="h-4 w-4" />
-                    Sign In
+                    {t('login.signin')}
                   </div>
                 )}
               </Button>
