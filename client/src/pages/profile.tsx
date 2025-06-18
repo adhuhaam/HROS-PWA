@@ -47,7 +47,7 @@ export function ProfilePage({ onBack, onLogout }: ProfilePageProps) {
   ];
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return 'Not specified';
+    if (!dateString) return t('profile.notSpecified');
     return new Date(dateString).toLocaleDateString([], { 
       month: 'long', 
       day: 'numeric',
@@ -56,7 +56,7 @@ export function ProfilePage({ onBack, onLogout }: ProfilePageProps) {
   };
 
   if (isLoading) {
-    return <LoadingOverlay isVisible={true} message="Loading profile..." />;
+    return <LoadingOverlay isVisible={true} message={`${t('loading')} ${t('profile')}...`} />;
   }
 
   if (!user) {
@@ -76,16 +76,16 @@ export function ProfilePage({ onBack, onLogout }: ProfilePageProps) {
 
   const profile: UserProfile = {
     ...user,
-    phone: employeeDetails?.contact_number || user.phone,
-    department: employeeDetails?.department || user.department,
-    position: employeeDetails?.designation || user.position,
-    photoUrl: employeeDetails?.photo_file_name
+    phone: (employeeDetails as any)?.contact_number || user.phone,
+    department: (employeeDetails as any)?.department || user.department,
+    position: (employeeDetails as any)?.designation || user.position,
+    photoUrl: (employeeDetails as any)?.photo_file_name
   };
 
   return (
     <div className="min-h-screen" style={{ background: '#f2f2f7' }}>
       <MobileHeader 
-        title="Profile" 
+        title={t('profile')} 
         onBack={onBack}
         showNotifications={true}
       />
@@ -151,7 +151,7 @@ export function ProfilePage({ onBack, onLogout }: ProfilePageProps) {
         <div className="ios-card">
           <div className="p-6">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4" style={{ fontWeight: 600, letterSpacing: '-0.022em' }}>
-              Contact Information
+{t('profile.contactInformation')}
             </h3>
             
             <div className="space-y-3">
@@ -265,10 +265,10 @@ export function ProfilePage({ onBack, onLogout }: ProfilePageProps) {
                       <Globe className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                     </div>
                     <span className="text-lg font-medium text-gray-900 dark:text-white" style={{ fontWeight: 500, letterSpacing: '-0.011em' }}>
-                      Language
+                      {t('profile.language')}
                     </span>
                   </div>
-                  <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                  <Select value={language} onValueChange={setLanguage}>
                     <SelectTrigger className="w-40 h-9 bg-white/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-600/50">
                       <SelectValue />
                     </SelectTrigger>
