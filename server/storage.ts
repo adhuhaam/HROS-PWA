@@ -165,6 +165,7 @@ export class MemStorage implements IStorage {
     const user: User = {
       ...insertUser,
       id,
+      profileImageUrl: null,
       joinDate: new Date(),
       createdAt: new Date(),
       updatedAt: new Date(),

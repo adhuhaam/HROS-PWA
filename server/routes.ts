@@ -1,15 +1,19 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { loginSchema, leaveRequestSchema, attendanceSchema } from "@shared/schema";
 import { z } from "zod";
+
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Simple session middleware for demo
   let currentUser: any = null;
 
   // Middleware to check authentication
-  const isAuthenticated = (req: any, res: any, next: any) => {
+  const isAuthenticated = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     if (!currentUser) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -22,21 +26,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { employeeId, password } = loginSchema.parse(req.body);
       
-      const user = await storage.getUserByEmployeeId(employeeId);
-      if (!user || user.password !== password) {
+      // Call external API
+      const response = await fetch("https://api.rccmaldives.com/ess/auth/login.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          username: employeeId, 
+          password: password 
+        }),
+      });
+
+      if (!response.ok) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      // Set current user (in real app, use proper session management)
+      const apiResponse = await response.json();
+      
+      // Check if login was successful
+      if (!apiResponse.success) {
+        return res.status(401).json({ message: apiResponse.message || "Invalid credentials" });
+      }
+
+      // Create or update user in local storage with API data
+      const userData = apiResponse.user || apiResponse.data;
+      let user = await storage.getUserByEmployeeId(employeeId);
+      
+      if (!user) {
+        // Create new user with API data
+        user = await storage.createUser({
+          employeeId: userData.employee_id || employeeId,
+          password: password, // Store for session management
+          name: userData.name || userData.full_name || "Employee",
+          email: userData.email || "",
+          phone: userData.phone || userData.mobile || "",
+          position: userData.position || userData.designation || "",
+          department: userData.department || "",
+        });
+      }
+
+      // Set current user for session
       currentUser = user;
       
       const { password: _, ...userWithoutPassword } = user;
       res.json({ user: userWithoutPassword });
     } catch (error) {
+      console.error("Login error:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: error.errors[0].message });
       }
-      res.status(500).json({ message: "Login failed" });
+      res.status(500).json({ message: "Login failed. Please try again." });
     }
   });
 
@@ -45,15 +85,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ message: "Logged out successfully" });
   });
 
-  app.get("/api/auth/user", isAuthenticated, async (req, res) => {
+  app.get("/api/auth/user", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     const { password: _, ...userWithoutPassword } = currentUser;
     res.json(userWithoutPassword);
   });
 
   // Dashboard stats
-  app.get("/api/dashboard/stats", isAuthenticated, async (req, res) => {
+  app.get("/api/dashboard/stats", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const today = new Date();
       const currentYear = today.getFullYear();
 
@@ -86,9 +126,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Attendance routes
-  app.get("/api/attendance", isAuthenticated, async (req, res) => {
+  app.get("/api/attendance", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const attendance = await storage.getAttendanceByUserId(userId);
       res.json(attendance);
     } catch (error) {
@@ -96,9 +136,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/attendance/today", isAuthenticated, async (req, res) => {
+  app.get("/api/attendance/today", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const today = new Date();
       const todayAttendance = await storage.getAttendanceByUserId(userId, today);
       res.json(todayAttendance[0] || null);
@@ -107,9 +147,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/attendance/checkin", isAuthenticated, async (req, res) => {
+  app.post("/api/attendance/checkin", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const now = new Date();
 
       const attendance = await storage.createAttendance({
@@ -126,9 +166,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/attendance/checkout", isAuthenticated, async (req, res) => {
+  app.post("/api/attendance/checkout", isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const today = new Date();
       const todayAttendance = await storage.getAttendanceByUserId(userId, today);
       
