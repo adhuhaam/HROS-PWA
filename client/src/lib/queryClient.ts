@@ -12,11 +12,21 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  // Convert local API paths to external API URLs
+  const apiUrl = url.startsWith('/api') 
+    ? url.replace('/api', 'https://api.rccmaldives.com/ess')
+    : `https://api.rccmaldives.com/ess${url}`;
+
+  const res = await fetch(apiUrl, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      ...(data ? {} : {})
+    },
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
+    mode: "cors",
   });
 
   await throwIfResNotOk(res);
@@ -29,8 +39,19 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
+    // Convert local API paths to external API URLs
+    const url = queryKey[0] as string;
+    const apiUrl = url.startsWith('/api') 
+      ? url.replace('/api', 'https://api.rccmaldives.com/ess')
+      : `https://api.rccmaldives.com/ess${url}`;
+
+    const res = await fetch(apiUrl, {
       credentials: "include",
+      mode: "cors",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      }
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
