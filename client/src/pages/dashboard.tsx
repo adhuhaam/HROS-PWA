@@ -1,24 +1,13 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import { Calendar, Clock, FileText, TrendingUp, User, Users, CheckCircle, XCircle, AlertCircle, Gift, Briefcase, Bell } from "lucide-react";
 import { MobileHeader } from "@/components/mobile-header";
+import { RotatingCard } from "@/components/rotating-card";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import { 
-  Clock, 
-  Calendar, 
-  DollarSign,
-  Users,
-  FileText,
-  MessageCircle,
-  Clock as UserClock,
-  Cake,
-  Book,
-  Images,
-  Building2
-} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { LoadingOverlay } from "@/components/loading-overlay";
+import Lottie from "lottie-react";
 
 interface DashboardPageProps {
   onNavigate: (page: string) => void;
@@ -31,312 +20,355 @@ interface DashboardStats {
   isCheckedIn: boolean;
 }
 
+interface User {
+  id: number;
+  name: string;
+  employeeId: string;
+  email: string;
+  department?: string;
+  position?: string;
+}
+
+interface EmployeeDetails {
+  emp_no: string;
+  name: string;
+  designation?: string;
+  department?: string;
+  contact_number?: string;
+  emp_email?: string;
+  photo_file_name?: string;
+}
+
+interface Notice {
+  id: string;
+  title: string;
+  content: string;
+  created_at?: string;
+}
+
+interface Holiday {
+  id: string;
+  holiday_name: string;
+  date: string;
+  type?: string;
+}
+
+const welcomeAnimation = {
+  v: "5.7.4",
+  fr: 30,
+  ip: 0,
+  op: 90,
+  w: 100,
+  h: 100,
+  nm: "Wave",
+  ddd: 0,
+  assets: [],
+  layers: [
+    {
+      ddd: 0,
+      ind: 1,
+      ty: 4,
+      nm: "Wave Hand",
+      sr: 1,
+      ks: {
+        o: { a: 0, k: 100 },
+        r: { 
+          a: 1, 
+          k: [
+            { i: { x: [0.667], y: [1] }, o: { x: [0.333], y: [0] }, t: 0, s: [0] },
+            { i: { x: [0.667], y: [1] }, o: { x: [0.333], y: [0] }, t: 15, s: [15] },
+            { i: { x: [0.667], y: [1] }, o: { x: [0.333], y: [0] }, t: 30, s: [-15] },
+            { i: { x: [0.667], y: [1] }, o: { x: [0.333], y: [0] }, t: 45, s: [15] },
+            { t: 89, s: [0] }
+          ]
+        },
+        p: { a: 0, k: [50, 50] },
+        a: { a: 0, k: [0, 0] },
+        s: { a: 0, k: [100, 100] }
+      },
+      ao: 0,
+      shapes: [
+        {
+          ty: "gr",
+          it: [
+            {
+              ty: "el",
+              d: 1,
+              s: { a: 0, k: [40, 40] },
+              p: { a: 0, k: [0, 0] }
+            },
+            {
+              ty: "fl",
+              c: { a: 0, k: [1, 0.8, 0.4, 1] },
+              o: { a: 0, k: 100 }
+            },
+            {
+              ty: "tr",
+              p: { a: 0, k: [0, 0] },
+              a: { a: 0, k: [0, 0] },
+              s: { a: 0, k: [100, 100] },
+              r: { a: 0, k: 0 },
+              o: { a: 0, k: 100 }
+            }
+          ]
+        }
+      ],
+      ip: 0,
+      op: 90,
+      st: 0,
+      bm: 0
+    }
+  ]
+};
+
 export function DashboardPage({ onNavigate }: DashboardPageProps) {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [isFlipped, setIsFlipped] = useState(false);
-
-  const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ["/api/dashboard/stats"],
-    retry: false,
+  const { data: user, isLoading: userLoading } = useQuery<User>({
+    queryKey: ["/api/auth/user"],
   });
 
-  const { data: employee } = useQuery({
+  const { data: employeeDetails, isLoading: detailsLoading } = useQuery<EmployeeDetails>({
     queryKey: ["/api/employee/details"],
-    retry: false,
+    enabled: !!user,
   });
 
-  // Get actual notices and holidays from API
-  const { data: notices = [] } = useQuery({
+  const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
+    queryKey: ["/api/dashboard/stats"],
+    enabled: !!user,
+  });
+
+  const { data: notices, isLoading: noticesLoading } = useQuery<Notice[]>({
     queryKey: ["/api/notices"],
-    retry: false,
+    enabled: !!user,
   });
 
-  const { data: holidays = [] } = useQuery({
+  const { data: holidays, isLoading: holidaysLoading } = useQuery<Holiday[]>({
     queryKey: ["/api/holidays"],
-    retry: false,
+    enabled: !!user,
   });
 
-  const flipCard = () => {
-    setIsFlipped(!isFlipped);
-  };
+  if (userLoading) {
+    return <LoadingOverlay isVisible={true} message="Loading dashboard..." />;
+  }
 
   const dashboardStats: DashboardStats = stats || {
-    todayStatus: "Not Checked In",
-    leaveBalance: "0 Days",
-    monthlyAttendance: "0/22 Days",
-    isCheckedIn: false
+    todayStatus: "Not Available",
+    leaveBalance: "0",
+    monthlyAttendance: "0%",
+    isCheckedIn: false,
+  };
+
+  const userName = employeeDetails?.name || user?.name || "Employee";
+  const employeeId = employeeDetails?.emp_no || user?.employeeId || "";
+
+  const getStatusIcon = (status: string) => {
+    if (status.includes("Checked In") || status.includes("Present")) {
+      return <CheckCircle className="h-6 w-6 text-green-500" />;
+    } else if (status.includes("Absent")) {
+      return <XCircle className="h-6 w-6 text-red-500" />;
+    } else {
+      return <AlertCircle className="h-6 w-6 text-yellow-500" />;
+    }
+  };
+
+  const getAttendanceColor = (attendance: string) => {
+    const value = parseInt(attendance);
+    if (value >= 90) return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+    if (value >= 75) return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+    return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <MobileHeader 
-        title="Dashboard" 
+    <div className="min-h-screen bg-background">
+      <MobileHeader
+        title=""
         showNotifications={true}
-        user={user ? {
-          name: user.name || user.staff_name || "Employee",
-          employeeId: user.employeeId || user.emp_no || ""
-        } : undefined}
+        user={{
+          name: userName,
+          employeeId: employeeId,
+        }}
       />
-      
-      <div className="px-5 pb-20 pt-4 space-y-6">
-        {/* Animated Employee ID Card */}
-        <div className="flex items-center justify-center min-h-[280px] w-full overflow-visible">
-          <div 
-            className="w-full max-w-[450px] h-[250px] relative cursor-pointer"
-            onClick={flipCard}
-            style={{ perspective: '2000px' }}
-          >
-            {/* Front Side */}
-            <div 
-              className={`absolute w-full h-full backface-hidden rounded-[15px] transition-transform duration-600 ease-in-out shadow-2xl ${
-                isFlipped ? 'rotate-y-180' : 'rotate-y-0'
-              }`}
-              style={{
-                background: 'linear-gradient(135deg, #006bad 0%, #050027 25%, #004069 50%, #006bad 75%, #050027 100%)',
-                transformStyle: 'preserve-3d'
-              }}
-            >
-              {/* Background overlay */}
-              <div className="absolute inset-0 rounded-[15px] overflow-hidden">
-                <div 
-                  className="absolute inset-0 opacity-70 bg-cover bg-center rounded-[15px]"
-                  style={{
-                    backgroundImage: 'url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDQwMCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMjUwIiBmaWxsPSJ1cmwoI2dyYWRpZW50KSIvPgo8ZGVmcz4KPGZ1Y2lhbEdyYWRpZW50IGlkPSJncmFkaWVudCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwMDZiYWQiIHN0b3Atb3BhY2l0eT0iMC4zIi8+CjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzA1MDAyNyIgc3RvcC1vcGFjaXR5PSIwLjMiLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4K)',
-                    mixBlendMode: 'multiply'
-                  }}
-                />
-                <div 
-                  className="absolute inset-0 rounded-[15px]"
-                  style={{
-                    background: 'rgba(1, 40, 88, 0.31)',
-                    borderTop: '0.9px solid rgba(13, 122, 223, 0.1)'
-                  }}
+
+      <div className="px-4 pb-20">
+        {/* Welcome Section */}
+        <Card className="mb-6 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-primary/20">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 flex-shrink-0">
+                <Lottie
+                  animationData={welcomeAnimation}
+                  loop={true}
+                  autoplay={true}
+                  style={{ width: "100%", height: "100%" }}
                 />
               </div>
-
-              {/* Top Row with photo + logo */}
-              <div className="flex justify-between items-start px-3 pt-3">
-                <div className="flex items-start justify-start">
-                  {employee?.photo_file_name ? (
-                    <img
-                      src={`https://hros.rccmaldives.com/assets/document/${employee.photo_file_name}`}
-                      className="w-[100px] h-[120px] object-contain opacity-80 mt-1 ml-1 rounded-[10px] mix-blend-luminosity"
-                      alt="Employee"
-                    />
-                  ) : (
-                    <Users className="w-15 h-15 text-white opacity-80" />
-                  )}
-                </div>
-                <div className="flex items-start justify-end">
-                  <Building2 className="w-12 h-12 text-white opacity-90" />
-                </div>
-              </div>
-
-              {/* Bottom Info */}
-              <div className="absolute bottom-4 left-0 right-0 px-5 flex justify-between items-end">
-                <div className="flex-1 flex flex-col justify-end items-start">
-                  <h3 className="text-white text-base font-normal uppercase">
-                    {employee?.name || user?.staff_name || user?.name || "Employee"}
-                  </h3>
-                  <p className="text-gray-300 text-[10px] font-normal uppercase">
-                    {employee?.designation || 'Employee'} -- {employee?.department || 'Department'}
-                  </p>
-                  <div className="h-px w-3/4 bg-white/30 my-1" />
-                  <p className="text-gray-300 text-[10px] font-normal uppercase">
-                    M- {employee?.contact_number || 'N/A'} ---- E- {employee?.emp_email || 'N/A'}
-                  </p>
-                </div>
-                <div className="flex flex-col justify-end items-end">
-                  <p className="text-white text-[11px] font-light text-right mb-2">
-                    Emp No
-                  </p>
-                  <p className="text-white text-xl font-semibold uppercase text-right">
-                    {employee?.emp_no || user?.emp_no || user?.employeeId || "0000"}
-                  </p>
-                </div>
+              <div className="flex-1">
+                <h2 className="text-xl font-bold text-foreground mb-1">
+                  Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'}!
+                </h2>
+                <p className="text-muted-foreground">Welcome back to HRoS Employee Portal</p>
               </div>
             </div>
+          </CardContent>
+        </Card>
 
-            {/* Back Side */}
-            <div 
-              className={`absolute w-full h-full backface-hidden rounded-[15px] transition-transform duration-600 ease-in-out shadow-2xl ${
-                isFlipped ? 'rotate-y-0' : 'rotate-y-180'
-              }`}
-              style={{
-                background: 'linear-gradient(225deg, #006bad 0%, #000024 25%, #006bad 50%, #000028 75%, #006bad 100%)',
-                transformStyle: 'preserve-3d'
-              }}
-            >
-              {/* Background overlay */}
-              <div className="absolute inset-0 rounded-[15px] overflow-hidden">
-                <div 
-                  className="absolute inset-0 opacity-70 bg-cover bg-center rounded-[15px]"
-                  style={{
-                    backgroundImage: 'url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDQwMCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMjUwIiBmaWxsPSJ1cmwoI2dyYWRpZW50KSIvPgo8ZGVmcz4KPGZ1Y2lhbEdyYWRpZW50IGlkPSJncmFkaWVudCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwMDZiYWQiIHN0b3Atb3BhY2l0eT0iMC4zIi8+CjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzA1MDAyNyIgc3RvcC1vcGFjaXR5PSIwLjMiLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4K)',
-                    mixBlendMode: 'multiply'
-                  }}
-                />
-                <Building2 className="absolute right-24 top-14 w-[150px] h-8 text-white opacity-20 mix-blend-difference" />
-                <div 
-                  className="absolute inset-0 rounded-[15px]"
-                  style={{
-                    background: 'rgba(1, 40, 88, 0.31)',
-                    borderTop: '0.9px solid rgba(13, 122, 223, 0.1)'
-                  }}
-                />
-              </div>
-              
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center text-white">
-                  <Building2 className="w-16 h-16 mx-auto mb-4 opacity-60" />
-                  <p className="text-sm font-light">RCC Maldives</p>
-                  <p className="text-xs opacity-75">Employee Self Service</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Access Grid */}
-        <div className="grid grid-cols-3 gap-4">
-          <button
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <RotatingCard
+            icon={getStatusIcon(dashboardStats.todayStatus)}
+            title="Today's Status"
+            value={dashboardStats.todayStatus}
+            bgColor="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900"
             onClick={() => onNavigate("attendance")}
-            className="aspect-square bg-white dark:bg-gray-800 rounded-xl shadow-lg flex flex-col items-center justify-center space-y-2 hover:shadow-xl transition-shadow"
-          >
-            <Clock className="w-9 h-9 text-[#006bad]" />
-            <span className="text-xs font-semibold text-gray-900 dark:text-white text-center">Attendance</span>
-          </button>
+          />
           
-          <button
+          <RotatingCard
+            icon={<Calendar className="h-6 w-6 text-primary" />}
+            title="Leave Balance"
+            value={`${dashboardStats.leaveBalance} days`}
+            bgColor="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900"
             onClick={() => onNavigate("leave")}
-            className="aspect-square bg-white dark:bg-gray-800 rounded-xl shadow-lg flex flex-col items-center justify-center space-y-2 hover:shadow-xl transition-shadow"
-          >
-            <Calendar className="w-9 h-9 text-[#006bad]" />
-            <span className="text-xs font-semibold text-gray-900 dark:text-white text-center">Leave</span>
-          </button>
+          />
           
-          <button
-            onClick={() => onNavigate("profile")}
-            className="aspect-square bg-white dark:bg-gray-800 rounded-xl shadow-lg flex flex-col items-center justify-center space-y-2 hover:shadow-xl transition-shadow"
-          >
-            <Users className="w-9 h-9 text-[#006bad]" />
-            <span className="text-xs font-semibold text-gray-900 dark:text-white text-center">Profile</span>
-          </button>
+          <RotatingCard
+            icon={<TrendingUp className="h-6 w-6 text-primary" />}
+            title="Attendance"
+            value={dashboardStats.monthlyAttendance}
+            bgColor="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900"
+            onClick={() => onNavigate("attendance")}
+          />
           
-          <button
+          <RotatingCard
+            icon={<Briefcase className="h-6 w-6 text-primary" />}
+            title="Payroll"
+            value="View Details"
+            bgColor="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900"
             onClick={() => onNavigate("payroll")}
-            className="aspect-square bg-white dark:bg-gray-800 rounded-xl shadow-lg flex flex-col items-center justify-center space-y-2 hover:shadow-xl transition-shadow"
-          >
-            <DollarSign className="w-9 h-9 text-[#006bad]" />
-            <span className="text-xs font-semibold text-gray-900 dark:text-white text-center">Payroll</span>
-          </button>
-          
-          <button
-            onClick={() => window.open('https://chat.rccmaldives.com', '_blank')}
-            className="aspect-square bg-white dark:bg-gray-800 rounded-xl shadow-lg flex flex-col items-center justify-center space-y-2 hover:shadow-xl transition-shadow"
-          >
-            <MessageCircle className="w-9 h-9 text-[#006bad]" />
-            <span className="text-xs font-semibold text-gray-900 dark:text-white text-center">Chat</span>
-          </button>
-          
-          <button
-            onClick={() => window.open('https://ot.rccmaldives.com', '_blank')}
-            className="aspect-square bg-white dark:bg-gray-800 rounded-xl shadow-lg flex flex-col items-center justify-center space-y-2 hover:shadow-xl transition-shadow"
-          >
-            <UserClock className="w-9 h-9 text-[#006bad]" />
-            <span className="text-xs font-semibold text-gray-900 dark:text-white text-center">OT</span>
-          </button>
-          
-          <button
-            onClick={() => window.open('https://birthday.rccmaldives.com', '_blank')}
-            className="aspect-square bg-white dark:bg-gray-800 rounded-xl shadow-lg flex flex-col items-center justify-center space-y-2 hover:shadow-xl transition-shadow"
-          >
-            <Cake className="w-9 h-9 text-[#006bad]" />
-            <span className="text-xs font-semibold text-gray-900 dark:text-white text-center">Birthday</span>
-          </button>
-          
-          <button
-            onClick={() => window.open('https://handbook.rccmaldives.com', '_blank')}
-            className="aspect-square bg-white dark:bg-gray-800 rounded-xl shadow-lg flex flex-col items-center justify-center space-y-2 hover:shadow-xl transition-shadow"
-          >
-            <Book className="w-9 h-9 text-[#006bad]" />
-            <span className="text-xs font-semibold text-gray-900 dark:text-white text-center">Handbook</span>
-          </button>
-          
-          <button
-            onClick={() => onNavigate("documents")}
-            className="aspect-square bg-white dark:bg-gray-800 rounded-xl shadow-lg flex flex-col items-center justify-center space-y-2 hover:shadow-xl transition-shadow"
-          >
-            <Images className="w-9 h-9 text-[#006bad]" />
-            <span className="text-xs font-semibold text-gray-900 dark:text-white text-center">Documents</span>
-          </button>
+          />
         </div>
 
-        {/* Announcements */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            📣 Announcements
-          </h2>
-          {notices.length === 0 ? (
-            <p className="text-sm text-gray-500">No announcements</p>
-          ) : (
-            <div className="space-y-2">
-              {notices.map((notice: any) => (
-                <div 
-                  key={notice.id} 
-                  className="bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg border-l-6 border-l-[#006bad]"
-                >
-                  <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-0">
-                    {notice.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    {notice.content}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-0">
-                    {notice.created_at}
-                  </p>
-                </div>
-              ))}
+        {/* Quick Actions */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Quick Actions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex flex-col items-center space-y-2"
+                onClick={() => onNavigate("attendance")}
+              >
+                <Clock className="h-6 w-6 text-primary" />
+                <span className="text-sm font-medium">Check In/Out</span>
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex flex-col items-center space-y-2"
+                onClick={() => onNavigate("leave")}
+              >
+                <Calendar className="h-6 w-6 text-primary" />
+                <span className="text-sm font-medium">Apply Leave</span>
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex flex-col items-center space-y-2"
+                onClick={() => onNavigate("documents")}
+              >
+                <FileText className="h-6 w-6 text-primary" />
+                <span className="text-sm font-medium">Documents</span>
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex flex-col items-center space-y-2"
+                onClick={() => onNavigate("profile")}
+              >
+                <User className="h-6 w-6 text-primary" />
+                <span className="text-sm font-medium">Profile</span>
+              </Button>
             </div>
-          )}
-        </div>
+          </CardContent>
+        </Card>
 
-        {/* Holidays */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            🎉 Holidays
-          </h2>
-          {holidays.length === 0 ? (
-            <p className="text-sm text-gray-500">No holidays</p>
-          ) : (
-            <div className="space-y-2">
-              {holidays
-                .sort((a: any, b: any) => new Date(a.holiday_date).getTime() - new Date(b.holiday_date).getTime())
-                .map((holiday: any) => {
-                  const isPast = new Date(holiday.holiday_date) < new Date();
-                  return (
-                    <div 
-                      key={holiday.id} 
-                      className={`p-2 rounded-lg shadow-lg border-l-6 ${
-                        isPast 
-                          ? 'bg-red-50 border-l-red-300' 
-                          : 'bg-white dark:bg-gray-800 border-l-[#006bad]'
-                      }`}
+        {/* Notices */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5" />
+              Latest Notices
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {noticesLoading ? (
+              <div className="flex justify-center py-4">
+                <LoadingOverlay isVisible={true} variant="pulse" message="Loading notices..." />
+              </div>
+            ) : notices && notices.length > 0 ? (
+              <ScrollArea className="h-32">
+                <div className="space-y-3">
+                  {notices.slice(0, 3).map((notice) => (
+                    <div
+                      key={notice.id}
+                      className="p-3 bg-muted/50 rounded-lg border border-border/50"
                     >
-                      <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-                        {holiday.holiday_name}
-                      </h3>
-                      <p className="text-xs text-gray-400">
-                        {holiday.holiday_date}
+                      <h4 className="font-medium text-sm text-foreground">{notice.title}</h4>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        {notice.content}
                       </p>
                     </div>
-                  );
-                })}
-            </div>
-          )}
-        </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            ) : (
+              <p className="text-center text-muted-foreground py-4">No notices available</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Upcoming Holidays */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Gift className="h-5 w-5" />
+              Upcoming Holidays
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {holidaysLoading ? (
+              <div className="flex justify-center py-4">
+                <LoadingOverlay isVisible={true} variant="pulse" message="Loading holidays..." />
+              </div>
+            ) : holidays && holidays.length > 0 ? (
+              <ScrollArea className="h-32">
+                <div className="space-y-3">
+                  {holidays.slice(0, 3).map((holiday) => (
+                    <div
+                      key={holiday.id}
+                      className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border/50"
+                    >
+                      <div>
+                        <h4 className="font-medium text-sm text-foreground">{holiday.holiday_name}</h4>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(holiday.date).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <Badge variant="secondary" className="text-xs">
+                        {holiday.type || "Holiday"}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            ) : (
+              <p className="text-center text-muted-foreground py-4">No upcoming holidays</p>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

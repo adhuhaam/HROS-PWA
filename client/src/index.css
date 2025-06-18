@@ -63,9 +63,27 @@
   }
 
   body {
-    @apply bg-hros-bg text-foreground font-roboto;
-    font-family: 'Roboto', system-ui, -apple-system, sans-serif;
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     overflow-x: hidden;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  html {
+    font-size: 14px;
+  }
+  
+  @media (min-width: 375px) {
+    html {
+      font-size: 15px;
+    }
+  }
+  
+  @media (min-width: 414px) {
+    html {
+      font-size: 16px;
+    }
   }
 }
 
