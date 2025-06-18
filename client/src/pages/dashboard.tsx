@@ -190,27 +190,16 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
       />
 
       <div className="px-4 pb-20">
-        {/* Welcome Section */}
-        <Card className="mb-6 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-primary/20">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 flex-shrink-0">
-                <Lottie
-                  animationData={welcomeAnimation}
-                  loop={true}
-                  autoplay={true}
-                  style={{ width: "100%", height: "100%" }}
-                />
-              </div>
-              <div className="flex-1">
-                <h2 className="text-xl font-bold text-foreground mb-1">
-                  Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'}!
-                </h2>
-                <p className="text-muted-foreground">Welcome back to HRoS Employee Portal</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Rotating Employee Card */}
+        <RotatingEmployeeCard 
+          employee={employeeDetails ? {
+            name: employeeDetails.name,
+            employeeId: employeeDetails.emp_no,
+            designation: employeeDetails.designation,
+            department: employeeDetails.department,
+            photoUrl: employeeDetails.photo_file_name
+          } : undefined}
+        />
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-4 mb-6">

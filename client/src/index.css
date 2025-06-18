@@ -64,10 +64,19 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     overflow-x: hidden;
-    font-size: 14px;
-    line-height: 1.5;
+    font-size: 17px;
+    line-height: 1.47;
+    font-weight: 400;
+    letter-spacing: -0.022em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: #f2f2f7;
+  }
+  
+  .dark body {
+    background: #000000;
   }
   
   html {
@@ -95,61 +104,121 @@
   }
 }
 
-/* Glassmorphism and Modern Utility Classes */
-.glass-card {
-  @apply backdrop-blur-md border shadow-lg rounded-lg;
-  background: rgba(255, 255, 255, 0.7);
-  border-color: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.dark .glass-card {
-  background: rgba(17, 24, 39, 0.7);
-  border-color: rgba(75, 85, 99, 0.3);
-}
-
-.glass-nav {
-  @apply backdrop-blur-xl border rounded-lg;
-  background: rgba(255, 255, 255, 0.6);
-  border-color: rgba(255, 255, 255, 0.2);
+/* iOS-Style Design System */
+.ios-card {
+  @apply rounded-2xl shadow-sm border-0;
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
-.dark .glass-nav {
-  background: rgba(17, 24, 39, 0.6);
-  border-color: rgba(75, 85, 99, 0.2);
+.dark .ios-card {
+  background: rgba(28, 28, 30, 0.95);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-.catalyst-card {
-  @apply backdrop-blur-md border rounded-xl shadow-sm;
+.ios-button {
+  @apply rounded-xl font-medium transition-all duration-200 border-0;
+  background: rgba(0, 122, 255, 1);
+  color: white;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.ios-button:hover {
+  background: rgba(0, 122, 255, 0.8);
+  transform: scale(0.98);
+}
+
+.ios-button-secondary {
+  @apply rounded-xl font-medium transition-all duration-200 border-0;
+  background: rgba(242, 242, 247, 1);
+  color: rgba(0, 0, 0, 0.8);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.dark .ios-button-secondary {
+  background: rgba(58, 58, 60, 1);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.ios-button-secondary:hover {
+  background: rgba(229, 229, 234, 1);
+  transform: scale(0.98);
+}
+
+.dark .ios-button-secondary:hover {
+  background: rgba(72, 72, 74, 1);
+}
+
+.ios-nav {
+  @apply backdrop-blur-2xl border-0 rounded-2xl;
   background: rgba(255, 255, 255, 0.8);
-  border-color: rgba(229, 231, 235, 0.5);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.04);
 }
 
-.dark .catalyst-card {
-  background: rgba(17, 24, 39, 0.8);
-  border-color: rgba(55, 65, 81, 0.5);
+.dark .ios-nav {
+  background: rgba(28, 28, 30, 0.8);
+  box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.04);
 }
 
-.catalyst-button {
-  @apply backdrop-blur-sm border hover:shadow-sm transition-all duration-200 rounded-lg;
-  background: rgba(255, 255, 255, 0.7);
-  border-color: rgba(229, 231, 235, 0.5);
+.ios-list-item {
+  @apply rounded-xl transition-all duration-150;
+  background: rgba(242, 242, 247, 0.6);
+  border: 1px solid rgba(242, 242, 247, 0.8);
 }
 
-.catalyst-button:hover {
-  background: rgba(255, 255, 255, 0.9);
+.dark .ios-list-item {
+  background: rgba(58, 58, 60, 0.6);
+  border: 1px solid rgba(58, 58, 60, 0.8);
 }
 
-.dark .catalyst-button {
-  background: rgba(31, 41, 55, 0.7);
-  border-color: rgba(55, 65, 81, 0.5);
+.ios-list-item:hover {
+  background: rgba(229, 229, 234, 0.8);
+  transform: scale(0.995);
 }
 
-.dark .catalyst-button:hover {
-  background: rgba(31, 41, 55, 0.9);
+.dark .ios-list-item:hover {
+  background: rgba(72, 72, 74, 0.8);
+}
+
+.ios-badge {
+  @apply rounded-full text-xs font-semibold px-2 py-1;
+  letter-spacing: -0.01em;
+}
+
+.ios-badge-green {
+  background: rgba(52, 199, 89, 0.15);
+  color: rgba(30, 132, 73, 1);
+}
+
+.dark .ios-badge-green {
+  background: rgba(52, 199, 89, 0.2);
+  color: rgba(52, 199, 89, 1);
+}
+
+.ios-badge-red {
+  background: rgba(255, 59, 48, 0.15);
+  color: rgba(215, 0, 21, 1);
+}
+
+.dark .ios-badge-red {
+  background: rgba(255, 59, 48, 0.2);
+  color: rgba(255, 59, 48, 1);
+}
+
+.ios-badge-yellow {
+  background: rgba(255, 204, 0, 0.15);
+  color: rgba(178, 142, 0, 1);
+}
+
+.dark .ios-badge-yellow {
+  background: rgba(255, 204, 0, 0.2);
+  color: rgba(255, 204, 0, 1);
 }
 
 .app-container {

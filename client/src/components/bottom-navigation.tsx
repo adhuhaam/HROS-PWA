@@ -15,11 +15,8 @@ export function BottomNavigation({ activeTab, onTabChange }: BottomNavigationPro
   ];
 
   return (
-    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-xs backdrop-blur-xl border-t pb-safe z-40" style={{
-      background: 'rgba(255, 255, 255, 0.1)',
-      borderColor: 'rgba(255, 255, 255, 0.1)'
-    }}>
-      <div className="flex items-center justify-around py-2">
+    <nav className="fixed bottom-4 left-4 right-4 ios-nav pb-safe z-40 mx-auto max-w-sm">
+      <div className="flex items-center justify-around py-2 px-2">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -28,14 +25,14 @@ export function BottomNavigation({ activeTab, onTabChange }: BottomNavigationPro
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`flex flex-col items-center space-y-0.5 px-2 py-1.5 rounded-lg transition-all duration-200 ${
+              className={`flex flex-col items-center space-y-1 px-3 py-2 rounded-xl transition-all duration-200 min-w-0 flex-1 ${
                 isActive 
-                  ? "text-primary scale-105" 
-                  : "text-muted-foreground hover:text-primary"
+                  ? "text-blue-500 transform scale-105" 
+                  : "text-gray-500 dark:text-gray-400 hover:text-blue-500"
               }`}
             >
-              <Icon className={`w-4 h-4 transition-transform ${isActive ? 'scale-110' : ''}`} />
-              <span className="text-[10px] font-medium">{tab.label}</span>
+              <Icon className={`w-6 h-6 transition-transform ${isActive ? 'scale-110' : ''}`} />
+              <span className="text-xs font-medium truncate">{tab.label}</span>
             </button>
           );
         })}

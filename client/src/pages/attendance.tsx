@@ -1,15 +1,13 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Clock, Calendar, CheckCircle, XCircle, MapPin, Clock3, Clock9, TrendingUp } from "lucide-react";
+import { Clock, Calendar, CheckCircle, XCircle, Clock3, Clock9, TrendingUp } from "lucide-react";
 import { MobileHeader } from "@/components/mobile-header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoadingOverlay } from "@/components/loading-overlay";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import Lottie from "lottie-react";
 
 interface AttendancePageProps {
   onBack: () => void;
@@ -31,72 +29,6 @@ interface TodayAttendance {
   checkOutTime?: string;
   status: string;
 }
-
-const checkInAnimation = {
-  v: "5.7.4",
-  fr: 30,
-  ip: 0,
-  op: 60,
-  w: 100,
-  h: 100,
-  nm: "Check In",
-  ddd: 0,
-  assets: [],
-  layers: [
-    {
-      ddd: 0,
-      ind: 1,
-      ty: 4,
-      nm: "Check",
-      sr: 1,
-      ks: {
-        o: { a: 0, k: 100 },
-        r: { a: 0, k: 0 },
-        p: { a: 0, k: [50, 50] },
-        a: { a: 0, k: [0, 0] },
-        s: { 
-          a: 1,
-          k: [
-            { i: { x: [0.667], y: [1] }, o: { x: [0.333], y: [0] }, t: 0, s: [0, 0] },
-            { i: { x: [0.667], y: [1] }, o: { x: [0.333], y: [0] }, t: 20, s: [120, 120] },
-            { t: 59, s: [100, 100] }
-          ]
-        }
-      },
-      ao: 0,
-      shapes: [
-        {
-          ty: "gr",
-          it: [
-            {
-              ty: "el",
-              d: 1,
-              s: { a: 0, k: [40, 40] },
-              p: { a: 0, k: [0, 0] }
-            },
-            {
-              ty: "fl",
-              c: { a: 0, k: [0.2, 0.8, 0.4, 1] },
-              o: { a: 0, k: 100 }
-            },
-            {
-              ty: "tr",
-              p: { a: 0, k: [0, 0] },
-              a: { a: 0, k: [0, 0] },
-              s: { a: 0, k: [100, 100] },
-              r: { a: 0, k: 0 },
-              o: { a: 0, k: 100 }
-            }
-          ]
-        }
-      ],
-      ip: 0,
-      op: 60,
-      st: 0,
-      bm: 0
-    }
-  ]
-};
 
 export function AttendancePage({ onBack }: AttendancePageProps) {
   const [activeTab, setActiveTab] = useState("today");
@@ -155,13 +87,13 @@ export function AttendancePage({ onBack }: AttendancePageProps) {
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
       case 'present':
-        return <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Present</Badge>;
+        return <span className="ios-badge ios-badge-green">Present</span>;
       case 'absent':
-        return <Badge variant="destructive">Absent</Badge>;
+        return <span className="ios-badge ios-badge-red">Absent</span>;
       case 'late':
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">Late</Badge>;
+        return <span className="ios-badge ios-badge-yellow">Late</span>;
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return <span className="ios-badge" style={{ background: 'rgba(142, 142, 147, 0.15)', color: 'rgba(142, 142, 147, 1)' }}>{status}</span>;
     }
   };
 
@@ -183,220 +115,222 @@ export function AttendancePage({ onBack }: AttendancePageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen" style={{ background: '#f2f2f7' }}>
       <MobileHeader 
         title="Attendance" 
         onBack={onBack}
         showNotifications={true}
       />
 
-      <div className="px-3 pb-20 space-y-4">
+      <div className="px-4 pb-28 space-y-4 pt-4">
         {/* Today's Status Card */}
-        <Card className="catalyst-card">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Clock className="h-5 w-5 text-primary" />
-              Today's Attendance
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                {new Date().toLocaleDateString([], { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
+        <div className="ios-card">
+          <div className="p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                <Clock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white" style={{ fontWeight: 600, letterSpacing: '-0.022em' }}>
+                  Today's Attendance
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {new Date().toLocaleDateString([], { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}
+                </p>
               </div>
               {getStatusBadge(todayAttendance?.status || 'Not Checked In')}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 mb-6">
               {/* Check In */}
-              <div className="glass-card p-4 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+              <div className="ios-list-item p-4">
+                <div className="text-center">
+                  <div className="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-2">
                     <Clock9 className="h-4 w-4 text-green-600 dark:text-green-400" />
                   </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Check In</p>
-                    <p className="text-sm font-medium">
-                      {formatTime(todayAttendance?.checkInTime)}
-                    </p>
-                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1">Check In</p>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-white" style={{ fontWeight: 600, letterSpacing: '-0.022em' }}>
+                    {formatTime(todayAttendance?.checkInTime)}
+                  </p>
                 </div>
               </div>
 
               {/* Check Out */}
-              <div className="glass-card p-4 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+              <div className="ios-list-item p-4">
+                <div className="text-center">
+                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-2">
                     <Clock3 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Check Out</p>
-                    <p className="text-sm font-medium">
-                      {formatTime(todayAttendance?.checkOutTime)}
-                    </p>
-                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1">Check Out</p>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-white" style={{ fontWeight: 600, letterSpacing: '-0.022em' }}>
+                    {formatTime(todayAttendance?.checkOutTime)}
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-3">
+            <div className="space-y-3">
               {!todayAttendance?.hasCheckedIn ? (
-                <Button
+                <button
                   onClick={() => checkInMutation.mutate()}
                   disabled={checkInMutation.isPending}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  className="w-full ios-button py-4 px-6 text-lg font-semibold"
+                  style={{ background: 'rgba(52, 199, 89, 1)' }}
                 >
                   {checkInMutation.isPending ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                       Checking In...
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4" />
+                    <div className="flex items-center justify-center gap-2">
+                      <CheckCircle className="h-5 w-5" />
                       Check In
                     </div>
                   )}
-                </Button>
+                </button>
               ) : !todayAttendance?.hasCheckedOut ? (
-                <Button
+                <button
                   onClick={() => checkOutMutation.mutate()}
                   disabled={checkOutMutation.isPending}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                  className="w-full ios-button py-4 px-6 text-lg font-semibold"
+                  style={{ background: 'rgba(0, 122, 255, 1)' }}
                 >
                   {checkOutMutation.isPending ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                       Checking Out...
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2">
-                      <XCircle className="h-4 w-4" />
+                    <div className="flex items-center justify-center gap-2">
+                      <XCircle className="h-5 w-5" />
                       Check Out
                     </div>
                   )}
-                </Button>
+                </button>
               ) : (
-                <div className="flex-1 glass-card p-3 rounded-lg text-center">
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-6 h-6">
-                      <Lottie
-                        animationData={checkInAnimation}
-                        loop={false}
-                        autoplay={true}
-                        style={{ width: "100%", height: "100%" }}
-                      />
+                <div className="ios-list-item p-4 text-center">
+                  <div className="flex items-center justify-center gap-3">
+                    <div className="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                      <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
                     </div>
-                    <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                    <span className="text-lg font-semibold text-green-600 dark:text-green-400" style={{ fontWeight: 600, letterSpacing: '-0.022em' }}>
                       All done for today!
                     </span>
                   </div>
                 </div>
               )}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Attendance Records */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 glass-nav">
-            <TabsTrigger value="today" className="text-xs">Today</TabsTrigger>
-            <TabsTrigger value="history" className="text-xs">History</TabsTrigger>
-          </TabsList>
+        <div className="ios-card">
+          <div className="p-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="ios-nav grid w-full grid-cols-2 p-1 mb-6">
+                <TabsTrigger value="today" className="text-sm font-medium py-2 px-4 rounded-lg data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm">
+                  Today
+                </TabsTrigger>
+                <TabsTrigger value="history" className="text-sm font-medium py-2 px-4 rounded-lg data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm">
+                  History
+                </TabsTrigger>
+              </TabsList>
 
-          <TabsContent value="today" className="space-y-3 mt-4">
-            {todayAttendance ? (
-              <Card className="catalyst-card">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                        <Calendar className="h-4 w-4 text-primary" />
+              <TabsContent value="today" className="space-y-3 mt-0">
+                {todayAttendance ? (
+                  <div className="ios-list-item p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                          <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="text-lg font-semibold text-gray-900 dark:text-white" style={{ fontWeight: 600, letterSpacing: '-0.022em' }}>
+                            Today
+                          </p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {formatDate(new Date().toISOString())}
+                          </p>
+                        </div>
+                      </div>
+                      {getStatusBadge(todayAttendance.status)}
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-500 dark:text-gray-400">In: </span>
+                        <span className="font-semibold text-gray-900 dark:text-white">{formatTime(todayAttendance.checkInTime)}</span>
                       </div>
                       <div>
-                        <p className="text-sm font-medium">Today</p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatDate(new Date().toISOString())}
-                        </p>
+                        <span className="text-gray-500 dark:text-gray-400">Out: </span>
+                        <span className="font-semibold text-gray-900 dark:text-white">{formatTime(todayAttendance.checkOutTime)}</span>
                       </div>
                     </div>
-                    {getStatusBadge(todayAttendance.status)}
                   </div>
-
-                  <div className="mt-3 grid grid-cols-2 gap-4 text-xs">
-                    <div>
-                      <span className="text-muted-foreground">In: </span>
-                      <span className="font-medium">{formatTime(todayAttendance.checkInTime)}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Out: </span>
-                      <span className="font-medium">{formatTime(todayAttendance.checkOutTime)}</span>
-                    </div>
+                ) : (
+                  <div className="ios-list-item p-6 text-center">
+                    <p className="text-gray-500 dark:text-gray-400">No attendance record for today</p>
                   </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="catalyst-card">
-                <CardContent className="p-6 text-center">
-                  <p className="text-sm text-muted-foreground">No attendance record for today</p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
+                )}
+              </TabsContent>
 
-          <TabsContent value="history" className="space-y-3 mt-4">
-            {recordsLoading ? (
-              <LoadingOverlay isVisible={true} variant="pulse" message="Loading records..." />
-            ) : attendanceRecords && attendanceRecords.length > 0 ? (
-              <div className="space-y-3">
-                {attendanceRecords.slice(0, 10).map((record) => (
-                  <Card key={record.id} className="catalyst-card">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                            <Calendar className="h-4 w-4 text-primary" />
+              <TabsContent value="history" className="space-y-3 mt-0">
+                {recordsLoading ? (
+                  <div className="ios-list-item p-6 text-center">
+                    <div className="w-6 h-6 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin mx-auto mb-2"></div>
+                    <p className="text-gray-500 dark:text-gray-400">Loading records...</p>
+                  </div>
+                ) : attendanceRecords && attendanceRecords.length > 0 ? (
+                  <div className="space-y-3">
+                    {attendanceRecords.slice(0, 10).map((record) => (
+                      <div key={record.id} className="ios-list-item p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
+                              <Calendar className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                            </div>
+                            <div>
+                              <p className="text-lg font-semibold text-gray-900 dark:text-white" style={{ fontWeight: 600, letterSpacing: '-0.022em' }}>
+                                {formatDate(record.date)}
+                              </p>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                                {record.hoursWorked ? `${record.hoursWorked}h worked` : 'Hours not calculated'}
+                              </p>
+                            </div>
+                          </div>
+                          {getStatusBadge(record.status)}
+                        </div>
+
+                        <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-gray-500 dark:text-gray-400">In: </span>
+                            <span className="font-semibold text-gray-900 dark:text-white">{formatTime(record.checkIn)}</span>
                           </div>
                           <div>
-                            <p className="text-sm font-medium">{formatDate(record.date)}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {record.hoursWorked ? `${record.hoursWorked}h worked` : 'Hours not calculated'}
-                            </p>
+                            <span className="text-gray-500 dark:text-gray-400">Out: </span>
+                            <span className="font-semibold text-gray-900 dark:text-white">{formatTime(record.checkOut)}</span>
                           </div>
                         </div>
-                        {getStatusBadge(record.status)}
                       </div>
-
-                      <div className="mt-3 grid grid-cols-2 gap-4 text-xs">
-                        <div>
-                          <span className="text-muted-foreground">In: </span>
-                          <span className="font-medium">{formatTime(record.checkIn)}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Out: </span>
-                          <span className="font-medium">{formatTime(record.checkOut)}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <Card className="catalyst-card">
-                <CardContent className="p-6 text-center">
-                  <TrendingUp className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">No attendance records found</p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-        </Tabs>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="ios-list-item p-6 text-center">
+                    <TrendingUp className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500 dark:text-gray-400">No attendance records found</p>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
       </div>
     </div>
   );
