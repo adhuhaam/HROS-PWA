@@ -195,10 +195,6 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
       <MobileHeader
         title=""
         showNotifications={true}
-        user={{
-          name: userName,
-          employeeId: employeeId,
-        }}
       />
 
       <div className="px-4 pb-28 pt-4">
@@ -235,7 +231,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
           />
           
           <RotatingCard
-            icon={<Calendar className="h-6 w-6 text-primary" />}
+            icon={<CalendarDaysIcon className="h-6 w-6 text-primary" />}
             title="Leave Balance"
             value={`${dashboardStats.leaveBalance} days`}
             bgColor="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900"
@@ -243,7 +239,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
           />
           
           <RotatingCard
-            icon={<TrendingUp className="h-6 w-6 text-primary" />}
+            icon={<ArrowTrendingUpIcon className="h-6 w-6 text-primary" />}
             title="Attendance"
             value={dashboardStats.monthlyAttendance}
             bgColor="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900"
@@ -251,7 +247,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
           />
           
           <RotatingCard
-            icon={<Briefcase className="h-6 w-6 text-primary" />}
+            icon={<BriefcaseIcon className="h-6 w-6 text-primary" />}
             title="Payroll"
             value="View Details"
             bgColor="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900"
@@ -263,7 +259,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
+              <UserIcon className="h-5 w-5" />
               Quick Actions
             </CardTitle>
           </CardHeader>
@@ -274,7 +270,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
                 className="h-auto p-4 flex flex-col items-center space-y-2"
                 onClick={() => onNavigate("attendance")}
               >
-                <Clock className="h-6 w-6 text-primary" />
+                <ClockIcon className="h-6 w-6 text-primary" />
                 <span className="text-sm font-medium">Check In/Out</span>
               </Button>
               
@@ -283,7 +279,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
                 className="h-auto p-4 flex flex-col items-center space-y-2"
                 onClick={() => onNavigate("leave")}
               >
-                <Calendar className="h-6 w-6 text-primary" />
+                <CalendarDaysIcon className="h-6 w-6 text-primary" />
                 <span className="text-sm font-medium">Apply Leave</span>
               </Button>
               
@@ -292,7 +288,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
                 className="h-auto p-4 flex flex-col items-center space-y-2"
                 onClick={() => onNavigate("documents")}
               >
-                <FileText className="h-6 w-6 text-primary" />
+                <DocumentTextIcon className="h-6 w-6 text-primary" />
                 <span className="text-sm font-medium">Documents</span>
               </Button>
               
@@ -301,7 +297,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
                 className="h-auto p-4 flex flex-col items-center space-y-2"
                 onClick={() => onNavigate("profile")}
               >
-                <User className="h-6 w-6 text-primary" />
+                <UserIcon className="h-6 w-6 text-primary" />
                 <span className="text-sm font-medium">Profile</span>
               </Button>
             </div>
