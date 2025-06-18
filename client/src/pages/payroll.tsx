@@ -46,9 +46,9 @@ export function PayrollPage({ onBack }: PayrollPageProps) {
   });
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('dv-MV', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'MVR',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);

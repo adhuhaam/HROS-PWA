@@ -22,7 +22,7 @@ export function BottomNavigation({ activeTab, onTabChange }: BottomNavigationPro
 
   return (
     <nav className="fixed bottom-4 left-4 right-4 z-40 mx-auto max-w-sm">
-      <div className="credit-card flex items-center justify-around py-3 px-4">
+      <div className="flex items-center justify-around py-3 px-4 rounded-2xl bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border border-gray-200/20 dark:border-gray-700/20">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
