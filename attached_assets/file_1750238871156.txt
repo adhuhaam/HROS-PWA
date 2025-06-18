@@ -1,0 +1,3451 @@
+Directory Structure:
+
+└── ./
+    ├── api
+    │   └── api.ts
+    └── app
+        ├── onboarding
+        │   ├── onboardingStyles.ts
+        │   ├── page1.tsx
+        │   └── page6.tsx
+        ├── utils
+        │   └── get-emp-no.ts
+        ├── _layout.tsx
+        ├── +not-found.tsx
+        ├── attendance.tsx
+        ├── birthday.tsx
+        ├── chat.tsx
+        ├── dashboard.tsx
+        ├── documents-screen.tsx
+        ├── handbook.tsx
+        ├── index.tsx
+        ├── leave.tsx
+        ├── login.tsx
+        ├── payroll.tsx
+        ├── profile.tsx
+        ├── settings.tsx
+        ├── theme-context.tsx
+        └── user-context.tsx
+
+
+
+---
+File: /api/api.ts
+---
+
+import axios from 'axios';
+import qs from 'qs';
+
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://api.rccmaldives.com/ess';
+
+export interface User {
+  id: string;
+  name: string;
+  designation?: string;
+  [key: string]: any;
+}
+
+export interface LoginResponse {
+  status: 'success' | 'error';
+  data?: Record<string, any>;
+  message?: string;
+}
+
+/**
+ * Logs in user with username and password using PHP API
+ */
+export const login = async (
+  username: string,
+  password: string
+): Promise<LoginResponse> => {
+  try {
+    const form = qs.stringify({ username, password });
+
+    const response = await axios.post(`${BASE_URL}/auth/index.php`, form, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+
+    return response.data as LoginResponse;
+  } catch (error: any) {
+    return {
+      status: 'error',
+      message: error?.response?.data?.message || 'Network error. Please try again.',
+    };
+  }
+};
+
+
+
+---
+File: /app/onboarding/onboardingStyles.ts
+---
+
+// onboarding/onboardingStyles.ts
+import { StyleSheet } from 'react-native';
+
+export const onboardingStyles = StyleSheet.create({
+ 
+  text: { fontSize: 20, textAlign: 'center', marginBottom: 30 },
+  
+    container: {
+      flex: 1,
+      padding: 24,
+      justifyContent: 'center',
+      alignItems: 'center',
+  },
+  animation: {
+    width: 240,
+    height: 240,
+    marginBottom: 30,
+  },
+    lottie: {
+      width: 200,
+      height: 200,
+      marginBottom: 30,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: '600',
+      textAlign: 'center',
+      marginBottom: 12,
+    },
+    subtitle: {
+      fontSize: 16,
+      textAlign: 'center',
+      marginBottom: 40,
+      paddingHorizontal: 10,
+    },
+    button: {
+      backgroundColor: '#007AFF',
+      paddingVertical: 14,
+      paddingHorizontal: 32,
+      borderRadius: 8,
+    },
+    buttonText: {
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: '600',
+    },
+  
+  
+
+});
+
+
+
+---
+File: /app/onboarding/page1.tsx
+---
+
+import { onboardingStyles as styles } from '@/app/onboarding/onboardingStyles';
+import { useTheme } from '@/app/theme-context';
+import { useRouter } from 'expo-router';
+import LottieView from 'lottie-react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
+
+export default function Page1() {
+  const router = useRouter();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
+  const bgColor = isDark ? '#121212' : '#ffffff';
+  const titleColor = isDark ? '#ffffff' : '#000000';
+  const subTextColor = isDark ? '#bbbbbb' : '#555555';
+
+  return (
+    <View style={[styles.container, { backgroundColor: bgColor }]}>
+      <LottieView
+        source={require('@/assets/animations/welcome.json')} // ✅ put your Lottie file here
+        autoPlay
+        loop
+        style={styles.lottie}
+      />
+
+      <Text style={[styles.title, { color: titleColor }]}>Welcome to HRoS</Text>
+      <Text style={[styles.subtitle, { color: subTextColor }]}>
+        Employee self-service portal to view/manage attendance, leave, salary, and more.
+      </Text>
+
+      <TouchableOpacity onPress={() => router.push('/onboarding/page6')} style={styles.button}>
+        <Text style={styles.buttonText}>Get Started</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+
+
+
+
+---
+File: /app/onboarding/page6.tsx
+---
+
+// onboarding/page6.tsx
+// final onboarding screen
+import { onboardingStyles as styles } from "@/app/onboarding/onboardingStyles";
+import { useTheme } from "@/app/theme-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import LottieView from "lottie-react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+
+export default function Page6() {
+    const router = useRouter();
+    const { theme } = useTheme();
+    const isDark = theme === "dark";
+
+    const bgColor = isDark ? "#121212" : "#ffffff";
+    const titleColor = isDark ? "#ffffff" : "#000000";
+    const subTextColor = isDark ? "#bbbbbb" : "#555555";
+
+    const finishOnboarding = async () => {
+        await AsyncStorage.setItem("first_time", "done");
+        router.replace("/login");
+    };
+
+    return (
+        <View style={styles.container}>
+            <LottieView
+                source={require("@/assets/animations/phone.json")} // ✅ put your Lottie file here
+                autoPlay
+                loop
+                style={styles.lottie}
+            />
+
+            <Text style={[styles.title, { color: titleColor }]}>
+                Your Journey Begins
+            </Text>
+            <Text style={[styles.subtitle, { color: subTextColor }]}>
+                Access your employee profile, track attendance, apply for leave, view
+
+                your payslips, and stay informed — all in one app. If you&apos;re unsure of
+                your login credentials, kindly reach out to your HR department for
+                assistance.
+            </Text>
+
+            <TouchableOpacity onPress={finishOnboarding}>
+                <Text style={styles.button}>Login</Text>
+            </TouchableOpacity>
+        </View>
+    );
+}
+
+
+
+---
+File: /app/utils/get-emp-no.ts
+---
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLocalSearchParams } from 'expo-router';
+
+export function useEmpNo(): string | null {
+  const { emp_no } = useLocalSearchParams();
+  return typeof emp_no === 'string' ? emp_no : null;
+}
+
+export async function resolveEmpNo(): Promise<string | null> {
+  const stored = await AsyncStorage.getItem('user');
+  return stored ? JSON.parse(stored)?.emp_no || null : null;
+}
+
+
+
+---
+File: /app/_layout.tsx
+---
+
+import { ThemeProvider, useTheme } from '@/app/theme-context';
+import { UserProvider, useUser } from '@/app/user-context';
+import { Feather, Ionicons } from '@expo/vector-icons';
+import { useFonts } from 'expo-font';
+import * as Notifications from 'expo-notifications';
+import { Slot, usePathname, useRouter } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Menu, Provider as PaperProvider } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
+import {
+  Alert,
+  Pressable,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import Toast from 'react-native-toast-message';
+import '../i18n';
+
+SplashScreen.preventAutoHideAsync();
+
+function AppContent() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { theme } = useTheme();
+  const { logout } = useUser();
+  const { t } = useTranslation();
+  const isDark = theme === 'dark';
+
+  const isPublicPage = ['/', '/login', '/onboarding'].some((route) =>
+    pathname === route || pathname.startsWith(`${route}/`)
+  );
+  const isDashboard = pathname === '/dashboard';
+  const showNav = !isPublicPage;
+  const showBackButton = !isPublicPage && !isDashboard;
+
+  const [menuVisible, setMenuVisible] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.replace('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      Alert.alert(t('common.error'), t('auth.logoutFailed'));
+    }
+  };
+
+  useEffect(() => {
+    const setupNotifications = async () => {
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission required', 'Enable notifications to get chat alerts.');
+      }
+
+      await Notifications.setNotificationChannelAsync('chat-messages', {
+        name: 'Chat Messages',
+        importance: Notifications.AndroidImportance.MAX,
+        sound: 'default',
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+
+
+    };
+
+    setupNotifications();
+  }, []);
+
+  return (
+    <View style={[styles.wrapper, { backgroundColor: isDark ? '#000' : '#F8F9FC' }]}>
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} translucent backgroundColor="transparent" />
+
+        {showNav && (
+          <View style={styles.navWrapper}>
+            {showBackButton ? (
+              <TouchableOpacity onPress={router.back} style={styles.backButton}>
+                <Ionicons name="arrow-back" size={26} color={isDark ? '#fff' : '#333'} />
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.backButtonPlaceholder} />
+            )}
+
+            <View style={styles.rightButtons}>
+              <Menu
+                visible={menuVisible}
+                onDismiss={() => setMenuVisible(false)}
+                anchor={
+                  <Pressable onPress={() => setMenuVisible(true)} hitSlop={10}>
+                    <Feather name="more-vertical" size={26} color={isDark ? '#fff' : '#333'} />
+                  </Pressable>
+                }
+                contentStyle={{ backgroundColor: isDark ? '#222' : '#fff' }}
+              >
+                <Menu.Item
+                  onPress={() => {
+                    setMenuVisible(false);
+                    router.push('/settings');
+                  }}
+                  leadingIcon="cog-outline"
+                  title="Settings"
+                  titleStyle={{ color: isDark ? '#eee' : '#333' }}
+                />
+                <Menu.Item
+                  onPress={() => {
+                    setMenuVisible(false);
+                    handleLogout();
+                  }}
+                  leadingIcon="power"
+                  title={t('auth.logout')}
+                  titleStyle={{ color: '#FF3B30' }}
+                />
+              </Menu>
+            </View>
+          </View>
+        )}
+
+        <Slot />
+        <Toast />
+      </SafeAreaView>
+    </View>
+  );
+}
+
+function LoadingScreen() {
+  return (
+    <View style={styles.loadingContainer}>
+      <Text style={styles.loadingText}>Connecting to RCC server . . .</Text>
+    </View>
+  );
+}
+
+export default function Layout() {
+  const [fontsLoaded] = useFonts({
+    'Poppins-Regular': require('@/assets/fonts/Poppins-Regular.ttf'),
+  });
+
+  const hideSplashScreen = useCallback(async () => {
+    if (fontsLoaded) await SplashScreen.hideAsync();
+  }, [fontsLoaded]);
+
+  useEffect(() => {
+    hideSplashScreen();
+  }, [hideSplashScreen]);
+
+  if (!fontsLoaded) return <LoadingScreen />;
+
+  return (
+    <ThemeProvider>
+      <UserProvider>
+        <PaperProvider>
+          <AppContent />
+        </PaperProvider>
+      </UserProvider>
+    </ThemeProvider>
+  );
+}
+
+const styles = StyleSheet.create({
+  wrapper: { flex: 1 },
+  container: { flex: 1, paddingTop: 40 },
+  navWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    marginBottom: 6,
+  },
+  backButton: { padding: 4 },
+  backButtonPlaceholder: { width: 30 },
+  rightButtons: {
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    position: 'relative',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '600',
+    marginTop: 20,
+  },
+});
+
+
+
+---
+File: /app/+not-found.tsx
+---
+
+import { Link, Stack } from 'expo-router';
+import LottieView from 'lottie-react-native';
+import { StyleSheet, Text, View } from 'react-native';
+
+export default function NotFoundScreen() {
+  return (
+    <>
+      <Stack.Screen options={{ title: '404 - Not Found' }} />
+      <View style={styles.container}>
+        <LottieView
+          source={require('@/assets/animations/404.json')}
+          autoPlay
+          loop
+          style={styles.animation}
+        />
+
+        <Text style={styles.title}>Oops! Page not found.</Text>
+        <Text style={styles.description}>The screen you’re looking for doesn’t exist.</Text>
+
+        <Link href="/" style={styles.link}>
+          <Text style={styles.linkText}>← Go to Home</Text>
+        </Link>
+      </View>
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  animation: {
+    width: 240,
+    height: 240,
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '600',
+    marginBottom: 8,
+    color: '#222',
+  },
+  description: {
+    fontSize: 16,
+    color: '#555',
+    textAlign: 'center',
+    marginBottom: 20,
+    maxWidth: 300,
+  },
+  link: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  linkText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 15,
+  },
+});
+
+
+
+---
+File: /app/attendance.tsx
+---
+
+import { useTheme } from '@/app/theme-context';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
+import Toast from 'react-native-toast-message';
+
+const dummyTimesheets = [
+  { month: 'January 2025' },
+  { month: 'February 2025' },
+  { month: 'March 2025' },
+  { month: 'April 2025' },
+  { month: 'May 2025' },
+  { month: 'June 2025' },
+];
+
+export default function AttendanceScreen() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const { t } = useTranslation();
+
+  const bg = isDark ? '#000' : '#F4F7FC';
+  const tileBg = isDark ? '#1e1e1e' : '#fff';
+  const headingColor = isDark ? '#fff' : '#000';
+  const textColor = isDark ? '#ccc' : '#333';
+  const redNote = '#FF3B30';
+
+  const [search, setSearch] = useState('');
+
+  const filtered = dummyTimesheets.filter((item) =>
+    item.month.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handlePress = () => {
+    Toast.show({
+      type: 'info',
+      text1: t('common.comingSoon'),
+      text2: t('attendance.featureSoon')
+    });
+  };
+
+  return (
+    <ScrollView contentContainerStyle={[styles.container, { backgroundColor: bg }]}>
+      <Text style={[styles.title, { color: headingColor }]}>{t('dashboard.attendance')}</Text>
+      <Text style={[styles.note, { color: redNote }]}>
+        {t('attendance.note')}
+      </Text>
+
+      <TextInput
+        placeholder={t('attendance.searchMonth')}
+        placeholderTextColor={isDark ? '#888' : '#aaa'}
+        style={[
+          styles.search,
+          {
+            backgroundColor: tileBg,
+            color: headingColor,
+            borderColor: isDark ? '#333' : '#ddd'
+          }
+        ]}
+        value={search}
+        onChangeText={setSearch}
+      />
+
+      {filtered.map((item) => (
+        <TouchableOpacity
+          key={item.month}
+          style={[styles.item, { backgroundColor: tileBg }]}
+          onPress={handlePress}
+        >
+          <Text style={[styles.itemText, { color: textColor }]}>{item.month}</Text>
+        </TouchableOpacity>
+      ))}
+
+      <Toast />
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { padding: 20, paddingBottom: 50, flexGrow: 1 },
+  title: { fontSize: 24, fontWeight: '600', marginBottom: 4 },
+  note: { fontSize: 12, marginBottom: 14 },
+  search: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 20
+  },
+  item: {
+    padding: 16,
+    borderRadius: 10,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#007AFF'
+  },
+  itemText: { fontSize: 16, fontWeight: '500' }
+});
+
+
+
+---
+File: /app/birthday.tsx
+---
+
+import { useTheme } from '@/app/theme-context';
+import { FontAwesome6 } from '@expo/vector-icons';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Calendar } from 'react-native-calendars';
+
+export default function BirthdayScreen() {
+
+    const [loading, setLoading] = useState(true);
+    const [birthdays, setBirthdays] = useState<any[]>([]);
+    const [markedDates, setMarkedDates] = useState({});
+
+
+    // dark
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+
+    const tileBg = isDark ? '#1e1e1e' : '#fff';
+    const tileText = isDark ? '#ccc' : '#000';
+    const sectionTitle22 = isDark ? '#fff' : '#000';
+    const dates = isDark ? '#fff' : '#808080';
+
+    useEffect(() => {
+        axios.get('https://api.rccmaldives.com/ess/birthday/index.php')
+            .then(res => {
+                if (res.data?.data) {
+                    const today = new Date();
+                    const year = today.getFullYear();
+                    const sorted = res.data.data
+                        .map((emp: any) => {
+                            const dob = new Date(emp.dob);
+                            const thisYearBirthday = new Date(year, dob.getMonth(), dob.getDate());
+                            return { ...emp, upcoming: thisYearBirthday };
+                        })
+                        .sort((a: any, b: any) => a.upcoming.getTime() - b.upcoming.getTime());
+
+                    const dateMap: any = {};
+                    sorted.forEach((emp: any) => {
+                        const date = emp.upcoming;
+                        const key = `${year}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+                        dateMap[key] = {
+                            marked: true,
+                            dotColor: 'red',
+                            customStyles: {
+                                container: {
+                                    backgroundColor: '#e26a6a',
+                                    borderRadius: 8,
+                                },
+                                text: {
+                                    color: '#fff',
+                                },
+                            }
+                        };
+                    });
+
+                    setMarkedDates(dateMap);
+                    setBirthdays(sorted);
+                }
+            })
+            .catch(err => console.error(err))
+            .finally(() => setLoading(false));
+    }, []);
+
+    if (loading) return <ActivityIndicator style={{ marginTop: 50 }} />;
+
+    return (
+        <ScrollView style={styles.container}>
+            <Text style={[styles.title, { textTransform: 'uppercase', color: isDark ? '#fff' : '#222' }]}>Birthdays Calendar</Text>
+
+            <View style={{
+                height: 3,
+                width: '100%',
+                backgroundColor: '#fff',
+                marginVertical: 1,
+                alignSelf: 'stretch',
+            }} />
+
+            <Calendar
+                markingType="custom"
+                markedDates={markedDates}
+                theme={{
+                    backgroundColor: isDark ? '#000' : '#fff',
+                    calendarBackground: isDark ? '#000' : '#fff',
+                    textSectionTitleColor: isDark ? '#bbb' : '#333',
+                    dayTextColor: isDark ? '#eee' : '#222',
+                    monthTextColor: isDark ? '#fff' : '#000',
+                    todayTextColor: '#006bad',
+                    arrowColor: '#006bad',
+                    textDisabledColor: isDark ? '#555' : '#ccc',
+                    selectedDayBackgroundColor: '#006bad',
+                    selectedDayTextColor: '#fff',
+                    dotColor: '#e53935',
+                    indicatorColor: '#006bad',
+                    textDayFontWeight: '500',
+                    textMonthFontWeight: 'bold',
+                    textDayFontSize: 14,
+                    textMonthFontSize: 16,
+                    textDayHeaderFontSize: 13,
+                }}
+                style={{
+                    borderRadius: 8,
+                    elevation: 2,
+                    backgroundColor: isDark ? '#0f0f0f' : '#fff',
+                    marginBottom: 20,
+                }}
+            />
+
+
+            <Text style={[styles.subheading, { color: isDark ? '#ccc' : '#444' }]}>Upcoming Birthdays</Text>
+
+            {birthdays.length === 0 ? (
+                <Text style={[styles.noBirthday, { color: isDark ? '#888' : '#666' }]}>No upcoming birthdays</Text>
+            ) : (
+                birthdays.map((emp, idx) => (
+                    <View
+                        key={idx}
+                        style={[
+                            styles.birthdayCard,
+                            {
+                                backgroundColor: isDark ? '#1e1e1e' : '#fff',
+                                borderLeftColor: '#006bad',
+                                elevation: 6,
+                                shadowColor: '#000000',
+                                shadowOffset: { width: 0, height: 3 },
+                                shadowOpacity: 0.19,
+                            },
+                        ]}
+                    >
+                        <View style={styles.bicontainer}>
+                            <View style={styles.birow}>
+                                <FontAwesome6 name="gift" size={24} color="#006bad" style={styles.icon} />
+                            </View>
+                            <View style={styles.birthdayInfo}>
+                                <Text style={[styles.name, { color: isDark ? '#fff' : '#222' }]}>{emp.name}</Text>
+                                <Text style={[styles.detail, { color: isDark ? '#ccc' : '#666' }]}>{emp.dob}</Text>
+                                <Text style={[styles.detail, { color: isDark ? '#ccc' : '#666' }]}>{emp.designation}</Text>
+                            </View>
+                        </View>
+
+                    </View>
+                ))
+            )}
+        </ScrollView>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: { padding: 20, flex: 1 },
+    title: { fontSize: 27, fontWeight: '500', marginBottom: 10, textAlign: 'center' },
+    subheading: { fontSize: 16, fontWeight: '600', marginTop: 10, marginBottom: 10 },
+    noBirthday: { fontSize: 14, textAlign: 'center' },
+
+    birthdayCard: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        padding: 14,
+        borderRadius: 12,
+        marginBottom: 4,
+        elevation: 2,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+    },
+    icon: {
+    },
+    birthdayInfo: {
+        flex: 1,
+
+    },
+    name: {
+        fontSize: 15,
+        fontWeight: '500',
+    },
+    detail: {
+        fontSize: 12,
+        marginTop: 2,
+    },
+
+    bicontainer: {
+        flexDirection: 'row',
+    },
+
+    birow: {
+        flexDirection: 'column',
+        alignContent: 'center',
+        justifyContent: 'center',
+        marginLeft: 15,
+        marginRight: 20,
+    },
+});
+
+
+
+---
+File: /app/chat.tsx
+---
+
+import { useTheme } from '@/app/theme-context';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import * as Notifications from 'expo-notifications';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+    KeyboardAvoidingView,
+    Platform,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from 'react-native';
+import Toast from 'react-native-toast-message';
+
+export default function ChatScreen() {
+    const { t } = useTranslation();
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+
+    const scrollViewRef = useRef<ScrollView>(null);
+    const [empNo, setEmpNo] = useState<string | null>(null);
+    const [messages, setMessages] = useState<any[]>([]);
+    const [newMessage, setNewMessage] = useState('');
+    const [refreshing, setRefreshing] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [isTyping, setIsTyping] = useState(false);
+    const [lastMessageCount, setLastMessageCount] = useState(0);
+
+    const loadEmpNo = async () => {
+        try {
+            const userData = await AsyncStorage.getItem('user');
+            if (userData) {
+                const parsed = JSON.parse(userData);
+                setEmpNo(parsed.emp_no);
+            }
+        } catch (err) {
+            console.error('Error loading emp_no', err);
+        }
+    };
+
+    const fetchMessages = async () => {
+        if (!empNo) return;
+        try {
+            const res = await axios.get(`https://api.rccmaldives.com/ess/chat/index.php?emp_no=${empNo}`);
+            if (res.data.status === 'success') {
+                setMessages(res.data.messages);
+                if (res.data.messages.length > lastMessageCount) {
+                    const latest = res.data.messages[res.data.messages.length - 1];
+                    if (latest.from === 'hr') {
+                        await Notifications.scheduleNotificationAsync({
+                            content: {
+                                title: 'New message from HR',
+                                body: latest.message,
+                                sound: 'default',
+                            },
+                            trigger: null,
+                            android: {
+                                channelId: 'chat-messages',
+                                sound: 'default',
+                                priority: 'max',
+                                vibrate: [0, 250, 250, 250],
+                            },
+                        });
+
+
+
+
+
+
+                    }
+
+                }
+                setLastMessageCount(res.data.messages.length);
+            }
+        } catch (err) {
+            console.error('Error fetching messages:', err);
+        } finally {
+            setRefreshing(false);
+            setLoading(false);
+        }
+    };
+
+
+    const sendMessage = async () => {
+        if (!empNo || !newMessage.trim()) {
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Type something first',
+                visibilityTime: 2000,
+            });
+            return;
+        }
+
+        const payload = new URLSearchParams({
+            emp_no: empNo,
+            message: newMessage.trim(),
+        }).toString();
+
+        try {
+            const res = await axios.post(
+                'https://api.rccmaldives.com/ess/chat/send.php',
+                payload,
+                { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+            );
+
+            if (res.data.status === 'success') {
+                setNewMessage('');
+                await fetchMessages();
+                setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
+            } else {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Error',
+                    text2: res.data.message || 'Send failed',
+                    visibilityTime: 2000,
+                });
+            }
+        } catch (err) {
+            console.error('Send error:', err);
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Error sending message',
+                visibilityTime: 2000,
+            });
+        }
+    };
+
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await fetchMessages();
+    }, [empNo]);
+
+    useEffect(() => {
+        loadEmpNo();
+    }, []);
+
+    useEffect(() => {
+        if (empNo) {
+            fetchMessages();
+            const interval = setInterval(fetchMessages, 5000);
+            return () => clearInterval(interval);
+        }
+    }, [empNo]);
+
+    return (
+        <KeyboardAvoidingView
+            style={{ flex: 1, backgroundColor: isDark ? '#000' : '#f2f2f2' }}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+            <ScrollView
+                ref={scrollViewRef}
+                contentContainerStyle={styles.chatContainer}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+            >
+                {messages.length === 0 && !loading ? (
+                    <Text style={[styles.noChatText, { color: isDark ? '#aaa' : '#444' }]}>No messages yet</Text>
+                ) : (
+                    messages.map((msg) => (
+                        <View
+                            key={msg.id}
+                            style={[
+                                styles.messageBubble,
+                                msg.from === 'employee' ? styles.selfBubble : styles.hrBubble,
+                                {
+                                    backgroundColor: msg.from === 'employee'
+                                        ? (isDark ? '#00344d' : '#daf1ff')
+                                        : (isDark ? '#1a1a1a' : '#eee'),
+                                },
+                            ]}
+                        >
+                            <View style={styles.senderRow}>
+                                <FontAwesome
+                                    name={msg.from === 'employee' ? 'user' : 'user'}
+                                    size={16}
+                                    color={isDark ? '#aaa' : '#444'}
+                                    style={styles.icon}
+                                />
+                                <Text style={styles.senderLabel}>{msg.from === 'employee' ? 'Me' : 'RCC HR'}</Text>
+                            </View>
+                            <Text style={{ color: isDark ? '#fff' : '#000' }}>{msg.message}</Text>
+                            <Text style={styles.timestamp}>
+                                {new Date(msg.timestamp).toLocaleString('en-GB', {
+                                    day: '2-digit',
+                                    month: 'short',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                })}
+                            </Text>
+                        </View>
+                    ))
+                )}
+                {isTyping && (
+                    <Text style={[styles.typingText, { color: isDark ? '#888' : '#666' }]}>Typing...</Text>
+                )}
+            </ScrollView>
+
+            <View style={[styles.inputContainer, { backgroundColor: isDark ? '#111' : '#fff' }]}>
+                <TextInput
+                    value={newMessage}
+                    onChangeText={(text) => {
+                        setNewMessage(text);
+                        setIsTyping(text.length > 0);
+                    }}
+                    placeholder={t('chat.placeholder') || 'Type your message...'}
+                    placeholderTextColor={isDark ? '#666' : '#999'}
+                    style={[styles.input, { color: isDark ? '#fff' : '#000' }]}
+                />
+                <TouchableOpacity onPress={sendMessage} style={styles.sendButton} disabled={loading}>
+                    <Ionicons name="send" size={22} color="#006bad" />
+                </TouchableOpacity>
+            </View>
+        </KeyboardAvoidingView>
+    );
+}
+
+const styles = StyleSheet.create({
+    chatContainer: {
+        padding: 10,
+        paddingBottom: 80,
+    },
+    noChatText: {
+        textAlign: 'center',
+        marginTop: 40,
+        fontSize: 14,
+    },
+    typingText: {
+        fontSize: 12,
+        fontStyle: 'italic',
+        marginTop: 6,
+        textAlign: 'left',
+    },
+    senderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 2,
+    },
+    senderLabel: {
+        fontSize: 11,
+        fontWeight: 'bold',
+        color: '#888',
+        marginLeft: 5,
+    },
+    icon: {
+        marginRight: 2,
+    },
+    messageBubble: {
+        padding: 10,
+        marginVertical: 4,
+        borderRadius: 8,
+        maxWidth: '85%',
+    },
+    selfBubble: {
+        alignSelf: 'flex-end',
+        borderTopRightRadius: 2,
+    },
+    hrBubble: {
+        alignSelf: 'flex-start',
+        borderTopLeftRadius: 2,
+    },
+    timestamp: {
+        fontSize: 10,
+        color: '#999',
+        marginTop: 4,
+        textAlign: 'right',
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+        borderTopWidth: 1,
+        borderColor: '#ddd',
+        position: 'absolute',
+        bottom: 0,
+        width: '100%',
+    },
+    input: {
+        flex: 1,
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+        backgroundColor: '#f2f2f2',
+        borderRadius: 20,
+        fontSize: 14,
+    },
+    sendButton: {
+        marginLeft: 10,
+        padding: 6,
+    },
+});
+
+
+
+---
+File: /app/dashboard.tsx
+---
+
+import { useTheme } from '@/app/theme-context';
+import {
+  Entypo,
+  FontAwesome, FontAwesome5, FontAwesome6,
+  Fontisto,
+  Ionicons
+} from '@expo/vector-icons';
+import { useUser } from '@/app/user-context';
+import axios from 'axios';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  Animated,
+  Image,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+
+
+
+export default function DashboardScreen() {
+  //lang
+  const { t } = useTranslation();
+  // dark theme
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
+  const tileBg = isDark ? '#1e1e1e' : '#fff';
+  const tileText = isDark ? '#ccc' : '#000';
+  const sectionTitle22 = isDark ? '#fff' : '#000';
+  const dates = isDark ? '#fff' : '#808080';
+
+
+
+
+
+  // Animated Linear Gradient card
+  const flipAnim = useRef(new Animated.Value(0)).current;
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  // Interpolate front and back rotation
+  const frontInterpolate = flipAnim.interpolate({
+    inputRange: [0, 180],
+    outputRange: ['0deg', '180deg'],
+  });
+
+  const backInterpolate = flipAnim.interpolate({
+    inputRange: [0, 180],
+    outputRange: ['180deg', '360deg'],
+  });
+
+
+  // Flip function
+  const flipCard = () => {
+    if (isFlipped) {
+      Animated.timing(flipAnim, {
+        toValue: 0,
+        duration: 600,
+        useNativeDriver: true,
+      }).start(() => setIsFlipped(false));
+    } else {
+      Animated.timing(flipAnim, {
+        toValue: 180,
+        duration: 600,
+        useNativeDriver: true,
+      }).start(() => setIsFlipped(true));
+    }
+  };
+
+
+  // State variables
+  const { user } = useUser();
+  const [employee, setEmployee] = useState<any>(null);
+  const [notices, setNotices] = useState<any[]>([]);
+  const [holidays, setHolidays] = useState<any[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const router = useRouter();
+
+  const loadData = async () => {
+    try {
+      if (!user) return;
+
+      const empNo = user.emp_no;
+
+      const [empRes, photoRes, noticeRes, holidayRes] = await Promise.all([
+        axios.get(`https://api.rccmaldives.com/ess/employees/index.php?emp_no=${empNo}`),
+        axios.get(`https://api.rccmaldives.com/ess/document/index.php?emp_no=${empNo}`),
+        axios.get('https://api.rccmaldives.com/ess/settings/index.php?type=notices'),
+        axios.get('https://api.rccmaldives.com/ess/settings/index.php?type=holidays'),
+      ]);
+
+      const photoFileName =
+        Array.isArray(photoRes?.data?.data)
+          ? photoRes.data.data.find((doc: { photo_file_name?: string }) => doc.photo_file_name)?.photo_file_name ?? null
+          : null;
+
+      if (empRes.data.status === 'success') {
+        setEmployee({
+          ...empRes.data.data,
+          photo_file_name: photoFileName,
+        });
+      }
+
+      if (noticeRes.data.status === 'success') setNotices(noticeRes.data.data);
+      if (holidayRes.data.status === 'success') setHolidays(holidayRes.data.data);
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    }
+  };
+
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadData();
+    setRefreshing(false);
+  }, []);
+
+  const navigateTo = (path: string) => {
+    router.push(path as any); // Still required unless all routes are declared in TS config
+  };
+
+  return (
+    <ScrollView
+      contentContainerStyle={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }>
+
+      {/* Profile Card */}
+      <Pressable onPress={flipCard}>
+        <View style={styles.cardContainer}>
+          <View style={styles.cardShadow}>
+
+
+            {/* FRONT SIDE */}
+            <Animated.View style={[styles.cardFace, { transform: [{ perspective: 2000 }, { rotateY: frontInterpolate }] }]}>
+
+              <LinearGradient
+                colors={[
+                  '#006bad',
+                  '#050027',
+                  '#004069',
+                  '#006bad',
+                  '#050027',
+                  '#006bad',
+                  '#042275' // brushed steel edge
+                ]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.xcard} >
+
+
+                <View style={styles.cardOverlay} />
+                <View style={styles.cardOverlayContainer}>
+                  <Image source={require('@/assets/bg.jpg')} style={styles.cardBackgroundImage} />
+                  <View style={styles.cardOverlay} />
+                </View>
+
+
+
+                {/* Top Row with photo + logo */}
+                <View style={styles.cardTopRow}>
+
+
+
+                  <View style={styles.cardleft}>
+                    {employee?.photo_file_name ? (
+                      <Image
+                        source={{ uri: `https://hros.rccmaldives.com/assets/document/${employee.photo_file_name}` }}
+                        style={styles.cardAvatar}
+                      />
+                    ) : (
+                      <Ionicons name="person-circle-outline" size={60} color="#fff" />
+                    )}
+
+                  </View>
+                  <View style={styles.cardright}>
+                    <Image source={require('@/assets/card_logo.png')} style={styles.logo} />
+                  </View>
+                </View>
+
+
+
+                {/* Info */}
+                <View style={styles.cardBottom}>
+                  <View style={styles.cardBottomLeft}>
+                    <Text style={styles.cardValue_name}>{employee?.name || user?.staff_name || user?.name}</Text>
+                    <Text style={styles.cardValue_designation}>{employee?.designation || 'Employee'}  --  {employee?.department}</Text>
+
+
+                    <View style={{
+                      height: 1,
+                      width: '70%',
+                      backgroundColor: '#ffffff50',
+                      marginVertical: 1,
+                      alignSelf: 'stretch',
+                    }} />
+
+                    <Text style={styles.cardValue_designation}>M- {employee?.contact_number}    ----    E-  {employee?.emp_email}</Text>
+                  </View>
+
+                  <View style={styles.cardBottomRight}>
+                    <Text style={styles.cardValue_empno_x}>Emp No</Text>
+                    <Text style={styles.cardValue_empno}>
+                      {employee?.emp_no || user?.emp_no}
+                    </Text>
+                  </View>
+                </View>
+
+              </LinearGradient>
+            </Animated.View>
+
+            {/* BACK SIDE */}
+            <Animated.View
+              style={[styles.cardFace, styles.cardBack, { transform: [{ perspective: 1000 }, { rotateY: backInterpolate }] }]}>
+              <LinearGradient
+                colors={[
+                  '#006bad', // matte light silver
+                  '#000024', // medium steel gray
+                  '#006bad', // highlight
+                  '#000028', // subtle contrast
+                  '#006bad'  // brushed steel edge
+                ]}
+                start={{ x: 0, y: 1 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.xcard} >
+
+
+
+
+
+                <View style={styles.cardOverlayContainer}>
+                  <Image source={require('@/assets/bg.jpg')} style={styles.cardBackgroundImage} />
+                  <Image source={require('@/assets/biz_card_logo.png')} style={styles.biz_card_logo} />
+                  <View style={styles.cardOverlay} />
+                </View>
+
+
+
+
+                {/* Add more fields if needed */}
+              </LinearGradient>
+            </Animated.View>
+
+          </View>
+
+        </View>
+      </Pressable>
+
+      {/* Quick Access Grid */}
+      <View style={styles.grid}>
+        <TouchableOpacity style={[styles.tile, { backgroundColor: tileBg }]} onPress={() => navigateTo('/attendance')}>
+          <FontAwesome5 name="business-time" size={36} color="#006bad" />
+          <Text style={[styles.tileTitle, { color: tileText }]}>{t('dashboard.attendance')}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.tile, { backgroundColor: tileBg }]} onPress={() => navigateTo('/leave')}>
+          <Fontisto name="island" size={36} color="#006bad" />
+          <Text style={[styles.tileTitle, { color: tileText }]}>{t('dashboard.leave')}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.tile, { backgroundColor: tileBg }]} onPress={() => navigateTo('/profile')}>
+          <FontAwesome name="user-circle-o" size={36} color="#006bad" />
+          <Text style={[styles.tileTitle, { color: tileText }]}>{t('dashboard.profile')}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.tile, { backgroundColor: tileBg }]} onPress={() => navigateTo('/payroll')}>
+          <FontAwesome6 name="file-invoice-dollar" size={36} color="#006bad" />
+          <Text style={[styles.tileTitle, { color: tileText }]}>{t('dashboard.payroll')}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.tile, { backgroundColor: tileBg }]} onPress={() => navigateTo('/chat')}>
+          <Ionicons name="chatbubbles" size={36} color="#006bad" />
+          <Text style={[styles.tileTitle, { color: tileText }]}>{t('dashboard.chat')}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.tile, { backgroundColor: tileBg }]} onPress={() => navigateTo('/ot')}>
+          <FontAwesome5 name="user-clock" size={36} color="#006bad" />
+          <Text style={[styles.tileTitle, { color: tileText }]}>{t('dashboard.ot')}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.tile, { backgroundColor: tileBg }]} onPress={() => navigateTo('/birthday')}>
+          <Entypo name="cake" size={36} color="#006bad" />
+          <Text style={[styles.tileTitle, { color: tileText }]}>{t('dashboard.birthday')}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.tile, { backgroundColor: tileBg }]} onPress={() => navigateTo('/handbook')}>
+          <FontAwesome name="book" size={36} color="#006bad" />
+          <Text style={[styles.tileTitle, { color: tileText }]}>{t('dashboard.handbook')}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.tile, { backgroundColor: tileBg }]} onPress={() =>
+          navigateTo(`/documents-screen?emp_no=${user?.emp_no || employee?.emp_no}`)}>
+          <Entypo name="images" size={36} color="#006bad" />
+          <Text style={[styles.tileTitle, { color: tileText }]}>{t('dashboard.documents')}</Text>
+        </TouchableOpacity>
+
+      </View>
+
+      {/* Announcements */}
+      <Text style={[styles.sectionTitle2, { color: sectionTitle22 }]}>📣 {t('dashboard.announcements')}</Text>
+      {notices.length === 0 ? (
+        <Text style={[styles.emptyText]}>{t('dashboard.noAnnouncements')}</Text>
+      ) : (
+        notices.map((notice) => (
+          <View key={notice.id} style={[styles.card, { backgroundColor: tileBg }]}>
+            <Text style={[styles.cardTitle, { color: sectionTitle22 }]}>{notice.title}</Text>
+            <Text style={[styles.cardContent, { color: dates }]}>{notice.content}</Text>
+            <Text style={[styles.cardDate, { color: dates }]}>{notice.created_at}</Text>
+          </View>
+        ))
+      )}
+
+      {/* Holidays */}
+      <Text style={[styles.sectionTitle2, { color: sectionTitle22 }]}>🎉 {t('dashboard.holidays')}</Text>
+      {holidays.length === 0 ? (
+        <Text style={[styles.emptyText, { color: sectionTitle22 }]}>{t('dashboard.noHolidays')}</Text>
+      ) : (
+        holidays
+          .sort((a, b) => new Date(a.holiday_date).getTime() - new Date(b.holiday_date).getTime())
+          .map((holiday) => {
+            const isPast = new Date(holiday.holiday_date) < new Date();
+
+            return (
+              <View
+                key={holiday.id}
+                style={[styles.card,
+                {
+                  backgroundColor: isPast ? '#FFECEC' : tileBg,
+                  borderLeftColor: isPast ? '#FF8A8A' : '#006bad',
+                },
+                ]}
+
+              >
+                <Text style={[styles.cardTitle, { color: sectionTitle22 }]}>
+                  {holiday.holiday_name}
+                </Text>
+                <Text style={[styles.cardDate, { color: dates }]}>
+                  {holiday.holiday_date}
+                </Text>
+              </View>
+            );
+          })
+      )}
+
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 20,
+    paddingBottom: 50,
+
+  },
+
+  //holiday styles
+  greeting: { fontSize: 19, fontWeight: '400', color: '#222' },
+  subtext: { fontSize: 13, color: '#666' },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginVertical: 20,
+    textAlign: 'center',
+  },
+  tile: {
+    width: '30%',
+    aspectRatio: 1,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginBottom: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 12,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.19,
+  },
+  tileTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#000',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+
+  // announcement styles
+  sectionTitle2: { fontSize: 17, fontWeight: '600', marginBottom: 10, marginTop: 20 },
+  emptyText: { fontSize: 14, color: '#888' },
+  card: {
+    backgroundColor: '#fff',
+    padding: 7,
+    borderRadius: 10,
+    marginBottom: 6,
+    borderLeftWidth: 6,
+    borderLeftColor: '#006bad',
+    elevation: 12,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.19,
+  },
+  cardTitle: { fontSize: 16, fontWeight: '600', marginBottom: 0, color: '#333' },
+  cardContent: { fontSize: 14, color: '#555' },
+  cardDate: { fontSize: 12, color: '#999', marginTop: 0 },
+
+
+
+
+
+
+
+  // card styles for profile section
+  cardContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 280, // Allow space for expansion
+    width: '100%',
+    overflow: 'visible',
+  },
+
+
+  cardShadow: {
+    width: '100%',
+    maxWidth: 450,
+    height: 250,
+    borderRadius: 8,
+    alignSelf: 'center',
+    position: 'relative',
+  },
+
+
+
+
+
+  cardFace: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    backfaceVisibility: 'hidden',
+    borderRadius: 15,
+
+  },
+
+
+
+
+
+
+
+  cardBack: {
+
+  },
+
+
+
+  biz_card_logo: {
+    width: 600,
+    height: 120,
+    resizeMode: 'center',
+    mixBlendMode: 'difference',
+    right: 102,
+    top: 55,
+  },
+
+
+
+
+
+
+
+
+
+
+  //card gradient 
+  xcard: {
+    flex: 1,
+    borderRadius: 15,
+    position: 'relative',
+    opacity: 0.99,
+  },
+  // container for bg image and overlay
+  cardOverlayContainer: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 15,
+    overflow: 'hidden',
+  },
+
+  // background image
+  cardBackgroundImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+    position: 'absolute',
+    backgroundBlendMode: 'multiply',
+    opacity: 0.69,
+    borderRadius: 15,
+
+
+
+  },
+
+  // overlay on top of image
+  cardOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(1, 40, 88, 0.31)',
+    borderTopWidth: 0.9,
+    borderColor: 'rgba(13, 122, 223, 0.1)',
+    borderRadius: 15,
+
+
+
+
+  },
+
+
+
+  // card bottom row
+
+  cardBottom: {
+    position: 'absolute',
+    bottom: 15,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 18,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
+
+  cardBottomLeft: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'flex-start',
+  },
+
+  cardBottomRight: {
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+  },
+
+
+
+  cardValue_name: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: '#fff',
+    textTransform: 'uppercase',
+    flexDirection: 'column',
+
+  },
+
+  cardValue_designation: {
+    fontSize: 10,
+    alignItems: 'flex-start',
+    fontWeight: '400',
+    color: '#aaa',
+    textTransform: 'uppercase',
+    flexDirection: 'column',
+  },
+
+
+
+
+  cardValue_empno: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#fff',
+    textTransform: 'uppercase',
+    textAlign: 'right',
+    flexDirection: 'row',
+  },
+
+  cardValue_empno_x: {
+    fontSize: 11,
+    fontWeight: '300',
+    color: '#fff',
+    textAlign: 'right',
+    top: 7,
+  },
+
+
+
+
+  // card top row
+
+  cardTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    paddingHorizontal: 10,
+    marginTop: 10,
+  },
+
+  cardleft: {
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+  },
+  cardright: {
+    alignItems: 'flex-end',
+    justifyContent: 'flex-start',
+  },
+  cardAvatar: {
+    width: 100,
+    height: 120,
+    resizeMode: 'contain',
+    opacity: 0.80,
+    marginTop: 3,
+    marginLeft: 3,
+    borderRadius: 10,
+    mixBlendMode: 'luminosity',
+    zIndex: 0,
+
+
+  },
+  logo: {
+    width: 50,
+    height: 50,
+    resizeMode: 'contain',
+    marginTop: 0,
+    marginRight: 0,
+    zIndex: 0,
+  },
+
+
+
+
+});
+
+
+
+---
+File: /app/documents-screen.tsx
+---
+
+import { resolveEmpNo, useEmpNo } from '@/app/utils/get-emp-no'; // adjust the import path as needed
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import React, { useEffect, useState } from 'react';
+import {
+    ActivityIndicator,
+    Alert,
+    Image,
+    Linking,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+
+const BASE_URL = 'https://api.rccmaldives.com/ess/document/';
+const FILE_URL = 'https://hros.rccmaldives.com/assets/document/';
+
+export default function DocumentsScreen() {
+    const empNoFromParams = useEmpNo();
+    const [documents, setDocuments] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchDocuments = async () => {
+            let empNo = empNoFromParams;
+
+            if (!empNo) {
+                empNo = await resolveEmpNo();
+            }
+
+            if (!empNo) {
+                Alert.alert('Missing employee number', 'Cannot load documents.');
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${BASE_URL}index.php?emp_no=${empNo}`);
+                const json = await response.json();
+                if (json.status === 'success') {
+                    setDocuments(json.data);
+                } else {
+                    Alert.alert('Error', json.message || 'Unable to fetch documents.');
+                }
+            } catch (error) {
+                console.error('Document fetch failed:', error);
+                Alert.alert('Network error', 'Failed to load documents.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDocuments();
+    }, [empNoFromParams]);
+
+    const handleDownload = async (filename: string) => {
+        const fileUri = FILE_URL + filename;
+        const localPath = FileSystem.documentDirectory + filename;
+
+        try {
+            const downloadResult = await FileSystem.downloadAsync(fileUri, localPath);
+            await Sharing.shareAsync(downloadResult.uri);
+        } catch (err) {
+            console.error('Download failed:', err);
+            Alert.alert('Download failed', 'Unable to save or share the file.');
+        }
+    };
+
+    const renderFile = (filename: string) => {
+        if (!filename) return null;
+
+        const isImage = /\.(jpg|jpeg|png|gif)$/i.test(filename);
+        const isPdf = /\.pdf$/i.test(filename);
+
+        return (
+            <View style={{ marginBottom: 10 }}>
+                {isImage ? (
+                    <Image source={{ uri: FILE_URL + filename }} style={styles.image} resizeMode="cover" />
+                ) : isPdf ? (
+                    <TouchableOpacity
+                        style={styles.pdfButton}
+                        onPress={() => Linking.openURL(FILE_URL + filename)}
+                    >
+                        <Text style={{ color: '#fff', textAlign: 'center' }}>Open PDF</Text>
+                    </TouchableOpacity>
+                ) : null}
+
+                <TouchableOpacity style={styles.downloadButton} onPress={() => handleDownload(filename)}>
+                    <Text style={{ textAlign: 'center' }}>Download</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    };
+
+    if (loading) return <ActivityIndicator style={{ marginTop: 40 }} />;
+
+    return (
+        <ScrollView contentContainerStyle={styles.container}>
+            {documents.map((doc, index) => (
+                <View key={index} style={styles.card}>
+                    <Text style={styles.title}>{doc.doc_type}</Text>
+                    {renderFile(doc.front_file_name)}
+                    {renderFile(doc.back_file_name)}
+                    {renderFile(doc.photo_file_name)}
+                </View>
+            ))}
+        </ScrollView>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        padding: 16,
+        paddingBottom: 40,
+    },
+    card: {
+        marginBottom: 24,
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 16,
+        shadowColor: '#000',
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    title: {
+        fontWeight: '600',
+        fontSize: 16,
+        marginBottom: 10,
+        textTransform: 'capitalize',
+    },
+    image: {
+        width: '100%',
+        height: 180,
+        borderRadius: 8,
+        marginBottom: 5,
+    },
+    downloadButton: {
+        backgroundColor: '#f0f0f0',
+        paddingVertical: 6,
+        borderRadius: 6,
+    },
+    pdfButton: {
+        backgroundColor: '#1d4ed8',
+        paddingVertical: 10,
+        borderRadius: 6,
+        marginBottom: 5,
+    },
+});
+
+
+
+---
+File: /app/handbook.tsx
+---
+
+import { useTheme } from '@/app/theme-context';
+import axios from 'axios';
+import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+    ActivityIndicator,
+    Image,
+    Platform,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+
+type HandbookSubsection = {
+    sub_heading: string;
+    content: string;
+    image: string | null;
+};
+
+type HandbookSection = {
+    main_heading: string;
+    subsections: HandbookSubsection[];
+};
+
+export default function HandbookScreen() {
+    const { t } = useTranslation();
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+
+    const [data, setData] = useState<HandbookSection[]>([]);
+    const [filteredData, setFilteredData] = useState<HandbookSection[]>([]);
+    const [search, setSearch] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+    const scrollViewRef = useRef<ScrollView>(null);
+    const sectionRefs = useRef<Record<number, View | null>>({});
+    const sectionPositions = useRef<Record<number, number>>({});
+
+    const fetchHandbook = async () => {
+        try {
+            const res = await axios.get('https://api.rccmaldives.com/ess/handbook/index.php');
+            if (res.data.status === 'success') {
+                setData(res.data.data);
+                setFilteredData(res.data.data);
+            }
+        } catch (err) {
+            console.error('Failed to fetch handbook', err);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchHandbook();
+    }, []);
+
+    const handleSearch = (text: string) => {
+        setSearch(text);
+        const keyword = text.toLowerCase().trim();
+
+        if (!keyword) {
+            setFilteredData(data);
+            return;
+        }
+
+        const filtered = data
+            .map(section => {
+                const matched = section.subsections.filter(sub =>
+                    sub.sub_heading.toLowerCase().includes(keyword) ||
+                    sub.content.toLowerCase().includes(keyword)
+                );
+                if (matched.length > 0) {
+                    return { ...section, subsections: matched };
+                }
+                return null;
+            })
+            .filter((s): s is HandbookSection => s !== null);
+
+        setFilteredData(filtered);
+    };
+
+    const scrollToSection = (index: number) => {
+        const y = sectionPositions.current[index];
+        if (typeof y === 'number') {
+            scrollViewRef.current?.scrollTo({ y, animated: true });
+        }
+    };
+
+    if (loading) {
+        return (
+            <View style={[styles.center, { backgroundColor: isDark ? '#000' : '#fff' }]}>
+                <ActivityIndicator size="large" color="#006bad" />
+                <Text style={[styles.loadingText, { color: isDark ? '#ccc' : '#555' }]}>
+                    {t('handbook.loading')}
+                </Text>
+            </View>
+        );
+    }
+
+    return (
+        <View style={{ flex: 1, backgroundColor: isDark ? '#000' : '#F8F9FC' }}>
+            <View style={[styles.header, { backgroundColor: isDark ? '#000' : '#fff' }]}>
+                <Text style={[styles.title, { color: isDark ? '#fff' : '#111' }]}>
+                    {t('handbook.title', 'HR HANDBOOK')}
+                </Text>
+
+                <TextInput
+                    placeholder={t('handbook.searchPlaceholder')}
+                    placeholderTextColor="#888"
+                    value={search}
+                    onChangeText={handleSearch}
+                    style={[
+                        styles.searchInput,
+                        {
+                            backgroundColor: isDark ? '#1e1e1e' : '#f1f3f9',
+                            color: isDark ? '#fff' : '#000',
+                            borderColor: isDark ? '#333' : '#ccc',
+                        },
+                    ]}
+                />
+
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tocScroll}>
+                    {filteredData.map((section, index) => (
+                        <TouchableOpacity
+                            key={index}
+                            onPress={() => scrollToSection(index)}
+                            style={[
+                                styles.tocItem,
+                                {
+                                    backgroundColor: isDark ? '#1c1c1e' : '#e2e8f0',
+                                    borderColor: isDark ? '#333' : '#ccc',
+                                },
+                            ]}
+                        >
+                            <Text style={{ color: isDark ? '#fff' : '#111', fontSize: 12 }}>
+                                {section.main_heading}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
+            </View>
+
+            <ScrollView
+                ref={scrollViewRef}
+                style={{ paddingHorizontal: 20 }}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchHandbook} />}
+            >
+                {filteredData.length === 0 ? (
+                    <Text style={{ color: isDark ? '#999' : '#444', textAlign: 'center', marginTop: 20 }}>
+                        {t('handbook.noResults')}
+                    </Text>
+                ) : (
+                    filteredData.map((section, index) => (
+                        <View
+                            key={index}
+                            ref={ref => {
+                                if (ref) sectionRefs.current[index] = ref;
+                            }}
+                            onLayout={event => {
+                                sectionPositions.current[index] = event.nativeEvent.layout.y;
+                            }}
+                        >
+                            <Text style={[styles.sectionHeading, { color: isDark ? '#fff' : '#1e293b' }]}>
+                                {section.main_heading}
+                            </Text>
+
+                            {section.subsections.map((sub, j) => (
+                                <View
+                                    key={j}
+                                    style={[
+                                        styles.pageCard,
+                                        {
+                                            backgroundColor: isDark ? '#1a1a1a' : '#fff',
+                                            shadowColor: isDark ? '#000' : '#ccc',
+                                        },
+                                    ]}
+                                >
+                                    <Text style={[styles.subHeading, { color: isDark ? '#fff' : '#111' }]}>
+                                        {sub.sub_heading}
+                                    </Text>
+
+                                    {sub.image && (
+                                        <Image
+                                            source={{ uri: sub.image }}
+                                            style={styles.image}
+                                            resizeMode="cover"
+                                        />
+                                    )}
+
+                                    <Text
+                                        style={[
+                                            styles.content,
+                                            {
+                                                color: isDark ? '#bbb' : '#333',
+                                                fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+                                            },
+                                        ]}
+                                    >
+                                        {sub.content}
+                                    </Text>
+                                </View>
+                            ))}
+                        </View>
+                    ))
+                )}
+            </ScrollView>
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    loadingText: { marginTop: 10, fontSize: 14 },
+    header: {
+        paddingTop: 20,
+        paddingBottom: 8,
+        paddingHorizontal: 20,
+        borderBottomWidth: 1,
+        borderColor: '#e2e8f0',
+        elevation: 2,
+    },
+    title: {
+        fontSize: 20,
+        fontWeight: '700',
+        fontFamily: 'Poppins-Regular',
+        marginBottom: 8,
+    },
+    searchInput: {
+        borderWidth: 1,
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        borderRadius: 12,
+        fontSize: 14,
+        marginBottom: 10,
+    },
+    tocScroll: {
+        marginBottom: 10,
+        flexDirection: 'row',
+    },
+    tocItem: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+        marginRight: 10,
+        borderWidth: 1,
+    },
+    sectionHeading: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginTop: 24,
+        marginBottom: 10,
+    },
+    pageCard: {
+        padding: 18,
+        borderRadius: 14,
+        marginBottom: 16,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 6,
+        elevation: 4,
+    },
+    subHeading: {
+        fontSize: 16,
+        fontWeight: '600',
+        marginBottom: 8,
+    },
+    content: {
+        fontSize: 15,
+        lineHeight: 24,
+        textAlign: 'justify',
+    },
+    image: {
+        width: '100%',
+        height: 180,
+        borderRadius: 12,
+        marginBottom: 12,
+    },
+});
+
+
+
+---
+File: /app/index.tsx
+---
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useUser } from '@/app/user-context';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+
+export default function WelcomeScreen() {
+  const router = useRouter();
+  const { user } = useUser();
+  const [showButton, setShowButton] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkStatus = async () => {
+      try {
+        const isFirstTime = await AsyncStorage.getItem('first_time');
+
+        if (!isFirstTime) {
+          router.replace('/onboarding/page1');
+        } else if (user) {
+          router.replace('/dashboard');
+        } else {
+          router.replace('/login');
+        }
+      } catch (error) {
+        console.warn('Startup routing error:', error);
+        setShowButton(true); // Allow manual override
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkStatus();
+  }, [user]);
+
+  const handleFallbackLogin = () => {
+    try {
+      router.push('/login');
+    } catch (e) {
+      Alert.alert('Navigation Error', 'Unable to go to login screen.');
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+
+
+      <Text style={styles.title}>Welcome to HRoS</Text>
+      <Text style={styles.subtitle}>The Employee Self-Service Portal</Text>
+
+      {loading && <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />}
+
+      {showButton && (
+        <TouchableOpacity onPress={handleFallbackLogin} style={styles.button} activeOpacity={0.85}>
+          <Text style={styles.buttonText}>Go to Login</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+    backgroundColor: '#fff',
+  },
+  animation: {
+    width: 240,
+    height: 240,
+    marginBottom: 30,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: '600',
+    color: '#222',
+    marginBottom: 6,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#555',
+    textAlign: 'center',
+    marginBottom: 40,
+    paddingHorizontal: 10,
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 10,
+    elevation: 2,
+    shadowColor: Platform.OS === 'ios' ? '#aaa' : '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  loader: {
+    marginTop: 20,
+  },
+});
+
+
+
+---
+File: /app/leave.tsx
+---
+
+import { useTheme } from '@/app/theme-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View
+} from 'react-native';
+
+export default function LeaveScreen() {
+  const { theme } = useTheme();
+  const { t } = useTranslation();
+  const isDark = theme === 'dark';
+
+  const tileBg = isDark ? '#1e1e1e' : '#fff';
+  const sectionTitle22 = isDark ? '#fff' : '#000';
+  const dates = isDark ? '#fff' : '#808080';
+
+  const [balances, setBalances] = useState<{ [key: string]: number }>({});
+  const [history, setHistory] = useState<any[]>([]);
+  const [search, setSearch] = useState('');
+  const [empNo, setEmpNo] = useState('');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const storedUser = await AsyncStorage.getItem('user');
+      if (!storedUser) return;
+
+      const user = JSON.parse(storedUser);
+      const emp_no = user.emp_no;
+      setEmpNo(emp_no);
+
+      try {
+        const [balanceRes, historyRes] = await Promise.all([
+          axios.get(`https://api.rccmaldives.com/ess/leaves/balances.php?emp_no=${emp_no}`),
+          axios.get(`https://api.rccmaldives.com/ess/leaves/index.php?emp_no=${emp_no}`)
+        ]);
+
+        if (balanceRes.data.status === 'success') setBalances(balanceRes.data.data);
+        if (historyRes.data.status === 'success') setHistory(historyRes.data.data);
+      } catch (error) {
+        console.error('Failed to fetch leave data', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const filteredHistory = history.filter(h =>
+    h.leave_type.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={[styles.title, { color: sectionTitle22 }]}>{t('leave.title')}</Text>
+      <Text style={[styles.sectionTitle, { color: sectionTitle22 }]}>{t('leave.leaveBalance')}</Text>
+
+      <View style={styles.badgesRow}>
+        {Object.entries(balances).map(([type, value]) => (
+          <View key={type} style={[styles.badge, { backgroundColor: tileBg }]}>
+            <Text style={[styles.badgeText, { color: dates }]}>{`${type}: ${value}`}</Text>
+          </View>
+        ))}
+      </View>
+
+      <Text style={[styles.sectionTitle, { color: sectionTitle22 }]}>{t('leave.leaveHistory')}</Text>
+      <TextInput
+        placeholder={t('leave.searchPlaceholder')}
+        value={search}
+        onChangeText={setSearch}
+        style={styles.search}
+      />
+
+      {filteredHistory.length === 0 ? (
+        <Text style={styles.emptyText}>{t('leave.noRecords')}</Text>
+      ) : (
+        filteredHistory.map(item => (
+          <View key={item.leave_id} style={styles.historyItem}>
+            <Text style={styles.historyTitle}>{item.leave_type}</Text>
+            <Text>{t('leave.from')}: {item.start_date} {t('leave.to')}: {item.end_date}</Text>
+            <Text>{t('leave.status')}: {item.status}</Text>
+          </View>
+        ))
+      )}
+
+      <TouchableOpacity style={styles.applyButton} onPress={() => alert(t('leave.featureSoon'))}>
+        <Text style={styles.applyButtonText}>{t('leave.applyLeave')}</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { padding: 20, paddingBottom: 50, flexGrow: 1 },
+  title: { fontSize: 24, fontWeight: '600', marginBottom: 16 },
+  badgesRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
+  badge: {
+    backgroundColor: '#b9d9fa',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+  },
+  badgeText: { color: '#006bad', fontWeight: '600', fontSize: 14 },
+  sectionTitle: { fontSize: 18, fontWeight: '600', marginBottom: 10, color: '#006bad' },
+  search: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 20,
+    backgroundColor: '#fff'
+  },
+  emptyText: { textAlign: 'center', color: '#888', marginTop: 20 },
+  historyItem: {
+    backgroundColor: '#fff',
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#007AFF',
+  },
+  historyTitle: { fontSize: 16, fontWeight: '600', marginBottom: 4 },
+  applyButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 14,
+    alignItems: 'center',
+    borderRadius: 8,
+    marginTop: 30,
+  },
+  applyButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+});
+
+
+
+---
+File: /app/login.tsx
+---
+
+import { login } from '@/api/api';
+import { useTheme } from '@/app/theme-context'; // Moved out of /app
+import { useUser } from '@/app/user-context';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import {
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import Toast from 'react-native-toast-message';
+
+export default function LoginScreen() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const bgColor = isDark ? '#121212' : '#fff';
+  const textColor = isDark ? '#fff' : '#000';
+  const subColor = isDark ? '#bbb' : '#555';
+
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { setUser } = useUser();
+
+  const handleLogin = async () => {
+    if (!username || !password) {
+      Alert.alert('Missing Fields', 'Please enter both username and password.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const result = await login(username, password);
+      setLoading(false);
+
+      if (result.status === 'success' && result.data) {
+        await setUser(result.data);
+        router.replace('/dashboard');
+      } else {
+        Alert.alert('Login Failed', result.message || 'Invalid credentials');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setLoading(false);
+      Alert.alert('Error', 'Something went wrong. Please try again.');
+    }
+  };
+
+  const handleForgotPassword = () => {
+    Toast.show({
+      type: 'info',
+      text1: 'Reset Password',
+      text2: 'Please contact the HR department.',
+    });
+  };
+
+  return (
+    <KeyboardAvoidingView
+      style={[styles.container, { backgroundColor: bgColor }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <Image source={require('@/assets/logo.png')} style={styles.logo} />
+      {/* TODO: Convert dark-logo.svg to component using SVGR if needed */}
+
+      <View>
+        <Text style={[styles.welcomeText, { color: textColor }]}>Welcome to HRoS</Text>
+        <Text style={[styles.title, { color: textColor }]}>
+          Employee Self Service Portal
+        </Text>
+      </View>
+
+      <TextInput
+        placeholder="Employee No"
+        placeholderTextColor={subColor}
+        value={username}
+        onChangeText={setUsername}
+        style={[styles.input, { backgroundColor: isDark ? '#1e1e1e' : '#fff', color: textColor }]}
+        autoCapitalize="none"
+      />
+      <TextInput
+        placeholder="Password"
+        placeholderTextColor={subColor}
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        style={[styles.input, { backgroundColor: isDark ? '#1e1e1e' : '#fff', color: textColor }]}
+      />
+
+      <TouchableOpacity
+        onPress={handleLogin}
+        style={styles.loginButton}
+        disabled={loading}
+      >
+        <Text style={styles.loginText}>
+          {loading ? 'Logging in...' : 'Login'}
+        </Text>
+      </TouchableOpacity>
+
+      <Text
+        style={[styles.forgotText, { color: subColor }]}
+        onPress={handleForgotPassword}
+      >
+        Forgot Password?
+      </Text>
+
+
+
+      <Toast />
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  logo: {
+    width: 130,
+    height: 130,
+    marginBottom: 16,
+  },
+  welcomeText: {
+    fontSize: 20,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  input: {
+    width: '100%',
+    height: 50,
+    borderColor: '#E0E0E0',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    marginBottom: 15,
+  },
+  loginButton: {
+    backgroundColor: '#007AFF',
+    borderRadius: 8,
+    paddingVertical: 14,
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  loginText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  forgotText: {
+    marginBottom: 24,
+  },
+  socialRow: {
+    flexDirection: 'row',
+    gap: 20,
+  },
+  socialIcon: {
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 50,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+});
+
+
+
+---
+File: /app/payroll.tsx
+---
+
+import { useTheme } from '@/app/theme-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+    Modal,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from 'react-native';
+import Toast from 'react-native-toast-message';
+
+const dummyMonths = [
+    'June 2025', 'May 2025', 'April 2025', 'March 2025', 'February 2025', 'January 2025'
+];
+
+const dummyBreakdown = [
+    { label: 'payroll.basic', amount: '4,500.00' },
+    { label: 'payroll.serviceAllowance', amount: '500.00' },
+    { label: 'payroll.overtime', amount: '250.00' },
+    { label: 'payroll.loanDeduction', amount: '-300.00' },
+    { label: 'payroll.noPay', amount: '-100.00' },
+    { label: 'payroll.totalEarnings', amount: '5,250.00' },
+    { label: 'payroll.totalDeductions', amount: '400.00' },
+    { label: 'payroll.netSalary', amount: '4,850.00' },
+];
+
+export default function PayrollScreen() {
+    const { theme } = useTheme();
+    const { t } = useTranslation();
+    const isDark = theme === 'dark';
+
+    const tileBg = isDark ? '#1e1e1e' : '#fff';
+    const textColor = isDark ? '#fff' : '#000';
+    const subColor = isDark ? '#aaa' : '#444';
+
+    const [monthlySalary, setMonthlySalary] = useState('0');
+    const [annualSalary, setAnnualSalary] = useState('0');
+    const [employeeName, setEmployeeName] = useState('Employee');
+    const [search, setSearch] = useState('');
+    const [showModal, setShowModal] = useState(false);
+    const [selectedMonth, setSelectedMonth] = useState('');
+
+    useEffect(() => {
+        const fetchSalary = async () => {
+            const storedUser = await AsyncStorage.getItem('user');
+            if (!storedUser) return;
+
+            const { emp_no } = JSON.parse(storedUser);
+            const res = await axios.get(`https://api.rccmaldives.com/ess/employees/index.php?emp_no=${emp_no}`);
+            if (res.data.status === 'success') {
+                const data = res.data.data;
+                setEmployeeName(data.name || 'Employee');
+
+                if (data.basic_salary) {
+                    const monthly = parseFloat(data.basic_salary).toFixed(2);
+                    setMonthlySalary(monthly);
+                    setAnnualSalary((parseFloat(monthly) * 12).toFixed(2));
+                }
+            }
+        };
+        fetchSalary();
+    }, []);
+
+    const formatMoney = (val: string) =>
+        parseFloat(val).toLocaleString(undefined, { minimumFractionDigits: 2 });
+
+    const openBreakdownModal = (month: string) => {
+        setSelectedMonth(month);
+        setShowModal(true);
+    };
+
+    const filteredMonths = dummyMonths.filter(m => m.toLowerCase().includes(search.toLowerCase()));
+
+    return (
+        <>
+            <ScrollView contentContainerStyle={[styles.container, { backgroundColor: isDark ? '#000' : '#F4F7FC' }]}>
+                <Text style={[styles.title, { color: textColor }]}>{t('payroll.title') || 'Payroll'}</Text>
+                <Text style={[styles.note, { color: '#FF3B30' }]}>
+                    {t('payroll.notice', { employeeName })}
+                </Text>
+
+                <View style={[styles.salaryCard, { backgroundColor: tileBg }]}>
+                    <Text style={[styles.label, { color: subColor }]}>{t('payroll.monthlySalary')}</Text>
+                    <Text style={[styles.amount, { color: textColor }]}>MVR {formatMoney(monthlySalary)}</Text>
+
+                    <View style={styles.divider} />
+
+                    <Text style={[styles.label, { color: subColor }]}>{t('payroll.annualSalary')}</Text>
+                    <Text style={[styles.amount, { color: textColor }]}>MVR {formatMoney(annualSalary)}</Text>
+                </View>
+
+                <TextInput
+                    placeholder={t('payroll.searchMonth') || 'Search month...'}
+                    placeholderTextColor={isDark ? '#aaa' : '#666'}
+                    value={search}
+                    onChangeText={setSearch}
+                    style={{
+                        borderWidth: 1,
+                        borderColor: '#ccc',
+                        borderRadius: 8,
+                        paddingHorizontal: 12,
+                        paddingVertical: 8,
+                        marginBottom: 10,
+                        color: textColor,
+                        backgroundColor: isDark ? '#2a2a2a' : '#f9f9f9',
+                    }}
+                />
+
+                {filteredMonths.map((month, i) => (
+                    <View key={i} style={[styles.row, { backgroundColor: tileBg }]}>
+                        <Text style={[styles.month, { color: textColor }]}>{month}</Text>
+                        <TouchableOpacity
+                            style={styles.viewBtn}
+                            onPress={() => openBreakdownModal(month)}
+                        >
+                            <Text style={styles.viewText}>{t('common.view') || 'View'}</Text>
+                        </TouchableOpacity>
+                    </View>
+                ))}
+            </ScrollView>
+
+            <Modal visible={showModal} animationType="slide" transparent>
+                <View style={styles.modalOverlay}>
+                    <View style={[styles.modalFullScreen, { backgroundColor: isDark ? '#1e1e1e' : '#fff' }]}>
+                        <Text style={[styles.modalTitle, { color: textColor }]}>
+                            {t('payroll.breakdownTitle', { month: selectedMonth })}
+                        </Text>
+                        <View style={styles.modalTitleDivider} />
+
+                        <ScrollView style={{ marginBottom: 16 }}>
+                            {dummyBreakdown.map((item, idx) => (
+                                <View key={idx}>
+                                    <View style={styles.breakRow}>
+                                        <Text style={[
+                                            styles.breakLabel,
+                                            {
+                                                color: item.label === 'payroll.netSalary' ? '#006bad' : textColor,
+                                                fontSize: item.label === 'payroll.netSalary' ? 18 : 14,
+                                                fontWeight: item.label === 'payroll.netSalary' ? '700' : '500',
+                                            },
+                                        ]}>
+                                            {t(item.label)}
+                                        </Text>
+                                        <Text style={[
+                                            styles.breakAmount,
+                                            {
+                                                color: item.label === 'payroll.netSalary' ? '#006bad' : textColor,
+                                                fontSize: item.label === 'payroll.netSalary' ? 18 : 14,
+                                                fontWeight: item.label === 'payroll.netSalary' ? '700' : '600',
+                                            },
+                                        ]}>
+                                            {item.amount}
+                                        </Text>
+                                    </View>
+                                    {item.label === 'payroll.noPay' && <View style={styles.dividerLine} />}
+                                </View>
+                            ))}
+                        </ScrollView>
+
+                        <Pressable onPress={() => setShowModal(false)} style={styles.modalClose}>
+                            <Text style={styles.modalCloseText}>{t('common.close') || 'Close'}</Text>
+                        </Pressable>
+                    </View>
+                </View>
+            </Modal>
+
+            <Toast />
+        </>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: { padding: 20, paddingBottom: 60, flexGrow: 1 },
+    title: { fontSize: 24, fontWeight: '700', marginBottom: 6 },
+    note: { fontSize: 10, marginBottom: 20, lineHeight: 14 },
+    salaryCard: {
+        padding: 18,
+        borderRadius: 12,
+        borderColor: '#ddd',
+        borderWidth: 1,
+        marginBottom: 30,
+    },
+    label: { fontSize: 14, fontWeight: '500' },
+    amount: { fontSize: 20, fontWeight: '600', marginBottom: 10 },
+    divider: {
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
+        marginVertical: 12,
+    },
+    row: {
+        borderWidth: 1,
+        borderColor: '#eee',
+        borderRadius: 10,
+        padding: 14,
+        marginBottom: 12,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    month: {
+        fontSize: 16,
+        fontWeight: '500',
+    },
+    viewBtn: {
+        backgroundColor: '#006bad',
+        paddingVertical: 6,
+        paddingHorizontal: 14,
+        borderRadius: 6,
+    },
+    viewText: {
+        color: '#fff',
+        fontWeight: '600',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+    },
+    modalFullScreen: {
+        flex: 1,
+        padding: 20,
+        paddingTop: 60,
+    },
+    modalTitle: {
+        fontSize: 23,
+        fontWeight: '700',
+        marginBottom: 10,
+        textAlign: 'center',
+    },
+    modalTitleDivider: {
+        height: 1,
+        backgroundColor: '#ccc',
+        marginBottom: 14,
+    },
+    breakRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 10,
+    },
+    breakLabel: { fontSize: 14 },
+    breakAmount: { fontSize: 14, fontWeight: '600' },
+    dividerLine: {
+        height: 1,
+        backgroundColor: '#ccc',
+        marginVertical: 10,
+    },
+    modalClose: {
+        backgroundColor: '#006bad',
+        paddingVertical: 10,
+        borderRadius: 6,
+    },
+    modalCloseText: {
+        color: '#fff',
+        textAlign: 'center',
+        fontWeight: '600',
+    },
+});
+
+
+
+---
+File: /app/profile.tsx
+---
+
+// File path: app/profile.tsx
+import { useTheme } from '@/app/theme-context';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+    ActivityIndicator,
+    Alert,
+    Modal,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    ToastAndroid,
+    TouchableOpacity,
+    View
+} from 'react-native';
+import { Image as CachedImage } from 'react-native-expo-image-cache';
+
+export default function ProfileScreen() {
+    const { t } = useTranslation();
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+    const tileBg = isDark ? '#1e1e1e' : '#fff';
+    const tileText = isDark ? '#ccc' : '#000';
+    const labelx = isDark ? '#fff' : '#000';
+    const valueColor = isDark ? '#ccc' : '#000';
+    const [empNo, setEmpNo] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [profile, setProfile] = useState<any>(null);
+    const [photoFileName, setPhotoFileName] = useState<string | null>(null);
+    const [imageError, setImageError] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [form, setForm] = useState({
+        contact_number: '',
+        email: '',
+        present_address: '',
+        emergency_contact_number: '',
+        emergency_contact_name: ''
+    });
+
+    useEffect(() => {
+        const load = async () => {
+            const userData = await AsyncStorage.getItem('user');
+            if (!userData) return;
+            const user = JSON.parse(userData);
+            setEmpNo(user.emp_no);
+            try {
+                const [empRes, photoRes] = await Promise.all([
+                    axios.get(`https://api.rccmaldives.com/ess/employees/index.php?emp_no=${user.emp_no}`),
+                    axios.get(`https://api.rccmaldives.com/ess/document/index.php?emp_no=${user.emp_no}`)
+                ]);
+                const foundPhoto = Array.isArray(photoRes?.data?.data)
+                    ? (photoRes.data.data.find((doc: any) => doc.photo_file_name)?.photo_file_name ?? null)
+                    : null;
+                if (empRes.data.status === 'success') {
+                    setProfile(empRes.data.data);
+                    setForm({
+                        contact_number: empRes.data.data.contact_number,
+                        email: empRes.data.data.email,
+                        present_address: empRes.data.data.persentaddress,
+                        emergency_contact_number: empRes.data.data.emergency_contact_number ?? '',
+                        emergency_contact_name: empRes.data.data.emergency_contact_name ?? ''
+                    });
+                    setPhotoFileName(foundPhoto);
+                }
+            } catch {
+                Alert.alert(t('error.title'), t('error.profileLoad'));
+            } finally {
+                setLoading(false);
+            }
+        };
+        load();
+    }, []);
+
+    const handleSave = async () => {
+        const { contact_number, email, present_address, emergency_contact_number, emergency_contact_name } = form;
+        if (!contact_number || !email || !present_address || !emergency_contact_name || !emergency_contact_number) {
+            Alert.alert(t('error.missingFields'), t('error.allFieldsRequired'));
+            return;
+        }
+        const formData = new FormData();
+        formData.append('emp_no', empNo);
+        formData.append('contact_number', contact_number);
+        formData.append('email', email);
+        formData.append('present_address', present_address);
+        formData.append('emergency_contact_number', emergency_contact_number);
+        formData.append('emergency_contact_name', emergency_contact_name);
+
+        try {
+            const res = await axios.post(
+                'https://api.rccmaldives.com/ess/employees/update_profile.php',
+                formData,
+                { headers: { 'Content-Type': 'multipart/form-data' } }
+            );
+            if (res.data.status === 'success') {
+                setModalVisible(false);
+                ToastAndroid.show(t('toast.profileUpdated'), ToastAndroid.SHORT);
+                setProfile({
+                    ...profile,
+                    ...form,
+                    persentaddress: form.present_address
+                });
+            } else {
+                Alert.alert(t('error.updateFailed'), res.data.message || t('error.tryAgain'));
+            }
+        } catch {
+            Alert.alert(t('error.title'), t('error.somethingWrong'));
+        }
+    };
+
+    if (loading) {
+        return (
+            <View style={styles.loading}>
+                <ActivityIndicator size="large" color="#007AFF" />
+            </View>
+        );
+    }
+
+    return (
+        <ScrollView contentContainerStyle={[styles.container, { backgroundColor: isDark ? '#000' : '#f9f9f9' }]}>
+            <View style={[styles.card, { backgroundColor: tileBg }]}>
+                <View style={styles.cardHeader}>
+                    <View style={styles.avatarContainer}>
+                        {!imageError && photoFileName ? (
+                            <CachedImage
+                                uri={`https://hros.rccmaldives.com/assets/document/${photoFileName}`}
+                                style={styles.avatar}
+                                onError={() => setImageError(true)}
+                            />
+                        ) : (
+                            <Ionicons name="person-circle-outline" size={100} color="#fff" />
+                        )}
+                    </View>
+                    <Text style={styles.cardName}>{profile.name}</Text>
+                    <Text style={styles.cardMeta}>{profile.designation} • #{profile.emp_no}</Text>
+                </View>
+
+                <View style={styles.infoBlock}>
+                    <Text style={[styles.sectionTitle, { color: tileText }]}>{t('profile.personalInfo')}</Text>
+                    <Text style={[styles.label, { color: labelx }]}>{t('profile.contact')}</Text>
+                    <Text style={[styles.value, { color: valueColor }]}>{profile.contact_number}</Text>
+                    <Text style={[styles.label, { color: labelx }]}>{t('profile.email')}</Text>
+                    <Text style={[styles.value, { color: valueColor }]}>{profile.email}</Text>
+                    <Text style={[styles.label, { color: labelx }]}>{t('profile.address')}</Text>
+                    <Text style={[styles.value, { color: valueColor }]}>{profile.persentaddress}</Text>
+                    <Text style={[styles.label, { color: labelx }]}>{t('profile.emergencyName')}</Text>
+                    <Text style={[styles.value, { color: valueColor }]}>{profile.emergency_contact_name}</Text>
+                    <Text style={[styles.label, { color: labelx }]}>{t('profile.emergencyNumber')}</Text>
+                    <Text style={[styles.value, { color: valueColor }]}>{profile.emergency_contact_number}</Text>
+
+                    <Text style={[styles.sectionTitle, { color: tileText }]}>{t('profile.jobInfo')}</Text>
+                    <Text style={[styles.label, { color: labelx }]}>{t('profile.department')}</Text>
+                    <Text style={[styles.value, { color: valueColor }]}>{profile.department}</Text>
+                    <Text style={[styles.label, { color: labelx }]}>{t('profile.dateOfJoin')}</Text>
+                    <Text style={[styles.value, { color: valueColor }]}>{profile.date_of_join}</Text>
+                    <Text style={[styles.label, { color: labelx }]}>{t('profile.salary')}</Text>
+                    <Text style={[styles.value, { color: valueColor }]}>{profile.basic_salary}</Text>
+                </View>
+
+                <TouchableOpacity style={styles.editButton} onPress={() => setModalVisible(true)}>
+                    <Text style={styles.editButtonText}>{t('profile.edit')}</Text>
+                </TouchableOpacity>
+            </View>
+
+            {/* Modal */}
+            <Modal animationType="slide" transparent={true} visible={modalVisible}>
+                <View style={styles.modalOverlay}>
+                    <View style={[styles.modalContent, { backgroundColor: tileBg }]}>
+                        <Text style={[styles.sectionTitle, { marginBottom: 10, color: tileText }]}>{t('profile.editProfile')}</Text>
+                        {['contactNumber', 'email', 'presentAddress', 'emergencyContactName', 'emergencyContactNumber'].map((key) => {
+                            const mapKeys: Record<string, keyof typeof form> = {
+                                contactNumber: 'contact_number',
+                                email: 'email',
+                                presentAddress: 'present_address',
+                                emergencyContactName: 'emergency_contact_name',
+                                emergencyContactNumber: 'emergency_contact_number'
+                            };
+                            const formKey = mapKeys[key];
+                            return (
+                                <TextInput
+                                    key={key}
+                                    placeholder={t(`profile.${key}`)}
+                                    placeholderTextColor="#999"
+                                    style={[styles.input, { color: labelx }]}
+                                    value={form[formKey]}
+                                    onChangeText={(val) => setForm({ ...form, [formKey]: val })}
+                                />
+                            );
+                        })}
+                        <View style={styles.modalActions}>
+                            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+                                <Text style={styles.saveText}>{t('profile.save')}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => setModalVisible(false)}>
+                                <Text style={styles.cancelText}>{t('profile.cancel')}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+        </ScrollView>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: { padding: 20 },
+    loading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    card: {
+        borderRadius: 12,
+        overflow: 'hidden',
+        elevation: 3,
+        marginBottom: 20
+    },
+    cardHeader: {
+        backgroundColor: '#006bad',
+        padding: 20,
+        alignItems: 'center'
+    },
+    avatarContainer: {
+        marginBottom: 10
+    },
+    avatar: {
+        width: 100,
+        height: 120,
+        borderRadius: 12,
+        borderWidth: 2,
+        borderColor: '#fff',
+        backgroundColor: '#f0f0f0'
+    },
+    cardName: { fontSize: 22, fontWeight: '700', color: '#fff' },
+    cardMeta: { fontSize: 14, color: '#f1f1f1', marginTop: 4 },
+    infoBlock: { padding: 20 },
+    sectionTitle: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
+    label: { fontSize: 13, color: '#777', marginTop: 10 },
+    value: { fontSize: 15, fontWeight: '500', color: '#222' },
+    editButton: {
+        backgroundColor: '#006bad',
+        padding: 14,
+        borderBottomLeftRadius: 12,
+        borderBottomRightRadius: 12,
+        alignItems: 'center'
+    },
+    editButtonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        justifyContent: 'center',
+        padding: 20
+    },
+    modalContent: {
+        padding: 20,
+        borderRadius: 12
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 8,
+        marginBottom: 12,
+        color: '#000'
+    },
+    modalActions: {
+        marginTop: 10,
+        flexDirection: 'row',
+        justifyContent: 'space-between'
+    },
+    saveButton: {
+        backgroundColor: '#006bad',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 6
+    },
+    saveText: {
+        color: '#fff',
+        fontWeight: '600'
+    },
+    cancelText: {
+        marginTop: 12,
+        color: '#888'
+    }
+});
+
+
+
+---
+File: /app/settings.tsx
+---
+
+import { useTheme } from '@/app/theme-context';
+import i18n from '@/i18n';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Picker } from '@react-native-picker/picker';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { StyleSheet, Switch, Text, View } from 'react-native';
+
+export default function SettingsScreen() {
+    const { theme, toggleTheme } = useTheme();
+    const isDark = theme === 'dark';
+    const { t } = useTranslation();
+    const [language, setLanguage] = useState(i18n.language);
+
+    const handleLanguageChange = async (lang: string) => {
+        try {
+            await i18n.changeLanguage(lang);
+            await AsyncStorage.setItem('lang', lang);
+            setLanguage(lang);
+        } catch (err) {
+            console.error('Language change error:', err);
+        }
+    };
+
+    return (
+        <View style={[styles.container, { backgroundColor: isDark ? '#000' : '#fff' }]}>
+            {/* Language Selection */}
+            <Text style={[styles.heading, { color: isDark ? '#fff' : '#000' }]}>{t('setting.selectLanguage')}</Text>
+            <View style={styles.row}>
+                <Ionicons name="language-sharp" size={22} color={isDark ? '#fff' : '#333'} style={styles.icon} />
+                <Picker
+                    selectedValue={language}
+                    onValueChange={handleLanguageChange}
+                    style={[styles.picker, { color: isDark ? '#fff' : '#333' }]}
+                    dropdownIconColor={isDark ? '#fff' : '#333'}
+                >
+                    <Picker.Item label="English" value="en" />
+                    <Picker.Item label="ދިވެހި" value="dv" />
+                    <Picker.Item label="हिन्दी" value="hi" />
+                    <Picker.Item label="தமிழ்" value="ta" />
+                    <Picker.Item label="മലയാളം" value="ml" />
+                    <Picker.Item label="বাংলা" value="bn" />
+                    <Picker.Item label="සිංහල" value="si" />
+                </Picker>
+            </View>
+
+            {/* Theme Switch */}
+            <Text style={[styles.heading, { color: isDark ? '#fff' : '#000' }]}>{t('setting.editTheme') || 'Theme'}</Text>
+            <View style={styles.row}>
+                <Ionicons name="moon" size={22} color={isDark ? '#fff' : '#333'} style={styles.icon} />
+                <Text style={[styles.label, { color: isDark ? '#fff' : '#000' }]}>{t('setting.darkMode') || 'Dark Mode'}</Text>
+                <Switch
+                    value={isDark}
+                    onValueChange={toggleTheme}
+                    thumbColor={isDark ? '#fff' : '#006bad'}
+                    trackColor={{ false: '#ccc', true: '#006bad' }}
+                />
+            </View>
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        padding: 20,
+        flex: 1,
+    },
+    heading: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginBottom: 10,
+    },
+    row: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 30,
+    },
+    icon: {
+        marginRight: 10,
+    },
+    picker: {
+        flex: 1,
+        height: 40,
+    },
+    label: {
+        flex: 1,
+        fontSize: 16,
+    },
+});
+
+
+
+---
+File: /app/theme-context.tsx
+---
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+
+type Theme = 'light' | 'dark';
+
+const ThemeContext = createContext<{
+    theme: Theme;
+    toggleTheme: () => void;
+}>({
+    theme: 'light',
+    toggleTheme: () => { },
+});
+
+export const useTheme = () => useContext(ThemeContext);
+
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+    const [theme, setTheme] = useState<Theme>('light');
+
+    // Always start from stored theme or default to 'light'
+    useEffect(() => {
+        const loadTheme = async () => {
+            try {
+                const storedTheme = await AsyncStorage.getItem('theme');
+                if (storedTheme === 'light' || storedTheme === 'dark') {
+                    setTheme(storedTheme);
+                } else {
+                    setTheme('light'); // ✅ always fallback to light, ignore system
+                }
+            } catch (error) {
+                console.warn('Failed to load theme from storage', error);
+                setTheme('light');
+            }
+        };
+        loadTheme();
+    }, []);
+
+    const toggleTheme = async () => {
+        try {
+            const newTheme = theme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+            await AsyncStorage.setItem('theme', newTheme);
+        } catch (error) {
+            console.error('Failed to toggle theme:', error);
+        }
+    };
+
+    return (
+        <ThemeContext.Provider value={{ theme, toggleTheme }}>
+            {children}
+        </ThemeContext.Provider>
+    );
+};
+
+
+
+---
+File: /app/user-context.tsx
+---
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { User } from '@/api/api';
+
+interface UserContextValue {
+  user: User | null;
+  setUser: (user: User | null) => Promise<void>;
+  logout: () => Promise<void>;
+}
+
+const UserContext = createContext<UserContextValue | undefined>(undefined);
+
+export const useUser = () => {
+  const ctx = useContext(UserContext);
+  if (!ctx) throw new Error('useUser must be used within UserProvider');
+  return ctx;
+};
+
+export const UserProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUserState] = useState<User | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const stored = await AsyncStorage.getItem('user');
+        if (stored) setUserState(JSON.parse(stored));
+      } catch (err) {
+        console.warn('Failed to load user', err);
+      }
+    };
+    load();
+  }, []);
+
+  const setUser = async (u: User | null) => {
+    try {
+      if (u) {
+        await AsyncStorage.setItem('user', JSON.stringify(u));
+      } else {
+        await AsyncStorage.removeItem('user');
+      }
+      setUserState(u);
+    } catch (err) {
+      console.warn('Failed to set user', err);
+    }
+  };
+
+  const logout = async () => {
+    await setUser(null);
+  };
+
+  return (
+    <UserContext.Provider value={{ user, setUser, logout }}>
+      {children}
+    </UserContext.Provider>
+  );
+};
+
