@@ -308,7 +308,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Bell className="h-5 w-5" />
+              <BellIcon className="h-5 w-5" />
               Latest Notices
             </CardTitle>
           </CardHeader>
@@ -343,7 +343,7 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Gift className="h-5 w-5" />
+              <GiftIcon className="h-5 w-5" />
               Upcoming Holidays
             </CardTitle>
           </CardHeader>
